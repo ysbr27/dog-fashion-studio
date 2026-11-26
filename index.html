@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Dog Fashion Studio (Beta): diseño 3D de ropa para perros con física de tela.">
+<meta name="author" content="ysbr27">
+<!-- © 2026 ysbr27. Todos los derechos reservados. -->
+<title>Dog Fashion Studio Beta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--sky-1:#e4f2ff; --sky-2:#b9dbf8;
+--ink:#0c2340; --ink-2:#3a5674; --ink-3:#6a83a0;
+--accent:#1c6fd8; --accent-2:#5aa9ff; --accent-soft:rgba(28,111,216,.12);
+--glass:rgba(255,255,255,.44); --glass-hi:rgba(255,255,255,.72); --edge:rgba(255,255,255,.78);
+--warn:#b4480e; --ok:#0e7a4c;
+--display:'Bricolage Grotesque','Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+--body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+--r:16px;
+color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(180deg,var(--sky-1),var(--sky-2));color:var(--ink);font:14px/1.45 var(--body);overflow:hidden}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
+.app{position:fixed;inset:0;display:grid;grid-template-columns:292px 1fr 324px;grid-template-rows:58px 1fr 58px;gap:10px;padding:10px;pointer-events:none}
+.app>*{pointer-events:auto}
+.glass{position:relative;background:linear-gradient(140deg,rgba(255,255,255,.62),rgba(255,255,255,.30));backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid var(--edge);border-radius:var(--r);box-shadow:0 12px 34px rgba(26,78,140,.16),inset 0 1px 0 rgba(255,255,255,.95),inset 0 -1px 0 rgba(120,170,220,.25)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 70%,rgba(255,255,255,.22) 100%)}
+.glass>*{position:relative}
+.top{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font:700 17px/1.1 var(--display);letter-spacing:-.01em;display:block}
+.beta{display:inline-block;vertical-align:2px;margin-left:4px;padding:1px 7px;border-radius:999px;background:linear-gradient(180deg,#4a9bff,#1c6fd8);color:#fff;font:700 10.5px/1.5 var(--body);letter-spacing:.06em;text-transform:uppercase}
+.brand small{color:var(--ink-2);font-size:12px}
+.proj-name{margin-left:auto;margin-right:auto;width:min(280px,30vw);text-align:center;background:transparent;border:1px solid transparent;border-radius:10px;padding:6px 10px;font:600 15px var(--display);color:var(--ink)}
+.proj-name:hover,.proj-name:focus{border-color:rgba(28,111,216,.35);background:rgba(255,255,255,.5);outline:none}
+.top-actions{display:flex;gap:6px}
+.left{grid-row:2;grid-column:1}
+.right{grid-row:2;grid-column:3}
+.panel{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.bottom{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:0 10px;overflow-x:auto;white-space:nowrap}
+.tabs{display:flex;gap:4px;padding:8px 8px 0}
+.tab{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:10px;font:600 13px var(--body);color:var(--ink-2);cursor:pointer}
+.tab:hover{background:rgba(255,255,255,.45)}
+.tab.on{background:var(--glass-hi);color:var(--ink);box-shadow:0 2px 8px rgba(26,78,140,.12),inset 0 1px 0 #fff}
+.pane{display:none;padding:10px 12px 16px;overflow-y:auto;min-height:0;flex:1}
+.pane.on{display:block}
+.pane::-webkit-scrollbar{width:8px}.pane::-webkit-scrollbar-thumb{background:rgba(28,111,216,.25);border-radius:8px}
+h4{font:700 12px/1 var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);margin:18px 0 8px}
+.hint{color:var(--ink-2);font-size:12.5px;margin:6px 0}
+.lbl{display:block;font-size:12.5px;color:var(--ink-2);font-weight:600;margin:8px 0 4px}
+.grow{flex:1;margin:0}
+.row{display:flex;gap:6px;align-items:center;margin:6px 0}
+.row.wrap{flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+.grid2 .lbl{margin:2px 0}
+.field{width:100%;background:rgba(255,255,255,.66);border:1px solid rgba(120,165,215,.45);border-radius:10px;padding:7px 9px;font:500 13.5px var(--body);color:var(--ink)}
+.field:focus{outline:2px solid rgba(28,111,216,.45);outline-offset:1px}
+.field.slim{width:auto;padding:4px 6px;font-size:12.5px}
+.btn{border:1px solid rgba(28,111,216,.35);background:linear-gradient(180deg,#4a9bff,#1c6fd8);color:#fff;font:600 13px var(--body);border-radius:10px;padding:7px 12px;cursor:pointer;box-shadow:0 3px 10px rgba(28,111,216,.28),inset 0 1px 0 rgba(255,255,255,.4);white-space:nowrap}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:rgba(255,255,255,.55);color:var(--ink);border-color:rgba(120,165,215,.45);box-shadow:inset 0 1px 0 #fff}
+.btn.ghost.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:12.5px}
+.btn.icon{width:34px;padding:6px 0;font-size:16px}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sep{width:1px;height:26px;background:rgba(80,130,190,.25);margin:0 4px;flex:none}
+.mini{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.mini input[type=range]{width:90px}
+.seg{display:flex;border:1px solid rgba(120,165,215,.45);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.45)}
+.seg button{border:0;background:transparent;padding:6px 9px;font:600 12.5px var(--body);color:var(--ink);cursor:pointer}
+.seg button+button{border-left:1px solid rgba(120,165,215,.35)}
+.seg button:hover{background:rgba(255,255,255,.7)}
+.fps{margin-left:auto;font:600 12px var(--body);color:var(--ink-3);font-variant-numeric:tabular-nums;padding-left:8px}
+input[type=range]{accent-color:var(--accent);width:100%}
+.ctl{margin:8px 0}
+.ctl-h{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.ctl-h output{color:var(--ink);font-variant-numeric:tabular-nums}
+.breed-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.breed{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 9px;border-radius:12px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.4);cursor:pointer;text-align:left;font:600 13px var(--body);color:var(--ink)}
+.breed small{font-weight:500;color:var(--ink-3);font-size:11.5px}
+.breed:hover{background:rgba(255,255,255,.7)}
+.breed.on{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.fold{margin-top:10px;border-top:1px solid rgba(120,165,215,.3);padding-top:6px}
+.fold summary{cursor:pointer;font-weight:700;padding:6px 0;color:var(--ink)}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gcard{display:flex;flex-direction:column;gap:4px;align-items:flex-start;padding:9px;border-radius:12px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.4);cursor:pointer;text-align:left;color:var(--ink);font:600 13px var(--body)}
+.gcard svg{width:34px;height:26px}
+.gcard small{font-weight:500;font-size:11.5px;color:var(--ink-3);line-height:1.3}
+.gcard:hover{background:rgba(255,255,255,.7)}
+.gcard.on{background:var(--accent-soft);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.fabric-list{display:flex;flex-direction:column;gap:5px}
+.fab{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;padding:7px 9px;border-radius:12px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.4);cursor:pointer;text-align:left;font:600 13px var(--body);color:var(--ink)}
+.fab i{width:28px;height:28px;border-radius:8px;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.fab small{display:block;font-weight:500;color:var(--ink-3);font-size:11.5px}
+.fab em{font-style:normal;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.fab.on{background:var(--accent-soft);border-color:var(--accent)}
+.fab:hover{background:rgba(255,255,255,.7)}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.slot{border:1px solid rgba(255,255,255,.8);border-radius:12px;padding:6px;background:rgba(255,255,255,.4);cursor:pointer;font:600 12px var(--body);color:var(--ink);text-align:left}
+.slot i{display:block;height:34px;border-radius:8px;margin-bottom:5px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.slot.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.color-in{width:100%;height:38px;border:1px solid rgba(120,165,215,.45);border-radius:10px;background:rgba(255,255,255,.6);padding:3px;cursor:pointer}
+.color-in.small{width:44px;height:32px;flex:none}
+.swatches{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.sw{width:38px;height:38px;border-radius:10px;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(26,78,140,.18)}
+.sw:hover{transform:translateY(-1px)}
+.chip{border:1px solid rgba(120,165,215,.45);background:rgba(255,255,255,.5);border-radius:999px;padding:4px 10px;font:600 12px var(--body);color:var(--ink);cursor:pointer}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.palette-list{display:flex;flex-direction:column;gap:6px}
+.pal{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;align-items:center;padding:7px 9px;border-radius:12px;border:1px solid rgba(255,255,255,.7);background:rgba(255,255,255,.4);cursor:pointer;text-align:left;color:var(--ink);font:600 13px var(--body)}
+.pal:hover{background:rgba(255,255,255,.7)}
+.pal .dots{display:flex;grid-row:1/3}
+.pal .dots i{width:20px;height:30px;display:block}
+.pal .dots i:first-child{border-radius:7px 0 0 7px}.pal .dots i:last-child{border-radius:0 7px 7px 0}
+.pal small{font-weight:500;color:var(--ink-3);font-size:11.5px;line-height:1.3}
+.contrast{font-size:12.5px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.5);margin-top:6px}
+.contrast b{font-variant-numeric:tabular-nums}
+.pattern-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.pat{border:2px solid rgba(255,255,255,.8);border-radius:10px;padding:0;overflow:hidden;cursor:pointer;background:#fff;display:flex;flex-direction:column}
+.pat canvas{width:100%;aspect-ratio:1;display:block}
+.pat span{font:600 10.5px var(--body);color:var(--ink-2);padding:3px 2px;text-align:center;background:rgba(255,255,255,.85)}
+.pat.on{border-color:var(--accent);box-shadow:0 0 0 2px rgba(28,111,216,.25)}
+.file-btn{display:block;margin:8px 0;text-align:center;padding:8px;border-radius:10px;border:1px dashed rgba(28,111,216,.5);background:rgba(255,255,255,.4);font:600 12.5px var(--body);color:var(--accent);cursor:pointer}
+.file-btn:hover{background:rgba(255,255,255,.7)}
+.file-btn input{display:none}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-size:13px;font-weight:600}
+.toggle input{width:18px;height:18px;accent-color:var(--accent)}
+.measure{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:13px;padding:10px;border-radius:12px;background:rgba(255,255,255,.5)}
+.measure b{font-variant-numeric:tabular-nums;text-align:right}
+.size-pill{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--accent);color:#fff;font:700 13px var(--display);margin-left:6px}
+.profile-list{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.prof{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.45);font-size:12.5px}
+.prof span{flex:1}
+.prof button{border:0;background:transparent;cursor:pointer;color:var(--accent);font:600 12px var(--body)}
+.stats{font-size:12.5px;display:grid;grid-template-columns:1fr auto;gap:3px 10px;padding:10px;border-radius:12px;background:rgba(255,255,255,.5)}
+.stats b{font-variant-numeric:tabular-nums;text-align:right}
+.tips{position:fixed;left:314px;bottom:80px;width:min(360px,calc(100vw - 680px));padding:10px 12px 10px 12px;font-size:12.5px;display:none}
+.tips.show{display:block}
+.tips h5{margin:0 0 4px;font:700 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.tips p{margin:4px 0;color:var(--ink)}
+.tips p.w{color:var(--warn)}
+.tips .x{position:absolute;right:6px;top:4px;border:0;background:transparent;cursor:pointer;color:var(--ink-3);font-size:14px}
+.viewhint{position:fixed;left:50%;top:78px;transform:translateX(-50%);font-size:12px;color:var(--ink-2);background:rgba(255,255,255,.55);padding:5px 12px;border-radius:999px;backdrop-filter:blur(8px);pointer-events:none;transition:opacity .6s}
+.viewhint.hide{opacity:0}
+.modal{position:fixed;inset:0;background:rgba(40,90,150,.18);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+.modal[hidden]{display:none}
+.modal-card{width:min(980px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:22px 24px;background:linear-gradient(140deg,rgba(255,255,255,.88),rgba(240,248,255,.78))}
+.modal-card h2{font:700 24px/1.15 var(--display);margin:0 0 10px;text-wrap:balance}
+.modal-card h3{font:700 17px var(--display);margin:18px 0 6px}
+.close{position:absolute;right:14px;top:12px;border:0;background:rgba(255,255,255,.7);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:15px;color:var(--ink);z-index:2}
+.guide{display:grid;grid-template-columns:220px 1fr;gap:20px;min-height:60vh}
+.guide nav{display:flex;flex-direction:column;gap:3px;position:sticky;top:0;align-self:start}
+.guide nav button{text-align:left;border:0;background:transparent;padding:7px 10px;border-radius:9px;font:600 13px var(--body);color:var(--ink-2);cursor:pointer}
+.guide nav button.on{background:var(--accent-soft);color:var(--accent)}
+.guide article{max-width:68ch;font-size:14.5px;line-height:1.6}
+.guide article h3{margin-top:22px}
+.guide article ul{padding-left:20px}
+.guide article li{margin:3px 0}
+.guide article table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+.guide article th,.guide article td{border-bottom:1px solid rgba(80,130,190,.25);padding:5px 6px;text-align:left}
+.guide .demo{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.guide .demo i{width:44px;height:44px;border-radius:10px;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.keys{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px}
+kbd{font:600 12px var(--body);background:#fff;border:1px solid rgba(80,130,190,.4);border-bottom-width:2px;border-radius:6px;padding:2px 7px}
+.proj-row{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.6);margin:5px 0}
+.proj-row span{flex:1}
+.proj-row small{color:var(--ink-3)}
+.photo img{max-width:100%;border-radius:12px;box-shadow:0 8px 24px rgba(26,78,140,.2)}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font:600 13px var(--body);opacity:0;transition:.25s;pointer-events:none;z-index:30}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.glfail{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:40;padding:20px}
+.glfail[hidden]{display:none}
+@media (max-width:1100px){.app{grid-template-columns:260px 1fr 290px}.tips{left:284px}}
+.msw{display:none}
+@media (max-width:860px){
+.app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto minmax(0,40vh);gap:8px;padding:8px;padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.top{grid-column:1;flex-wrap:wrap;gap:6px;padding:8px}
+.brand small{display:none}
+.proj-name{display:none}
+.top-actions{width:100%;overflow-x:auto;flex-wrap:nowrap}
+.bottom{grid-row:3;grid-column:1;padding:6px 8px;min-height:48px}
+.msw{display:flex;grid-row:4;grid-column:1;gap:6px;padding:4px}
+.msw button{flex:1}
+.left,.right{grid-row:5;grid-column:1;min-width:0}
+.right{display:none}
+body.m-right .left{display:none} body.m-right .right{display:flex}
+.tips{display:none!important}
+.viewhint{top:auto;bottom:calc(40vh + 130px);width:max-content;max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+.guide{grid-template-columns:1fr}
+.guide nav{position:static;flex-direction:row;flex-wrap:wrap}
+.modal{padding:8px}.modal-card{padding:16px}
+.breed-list,.card-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="Vista 3D del perro y la prenda"></canvas>
+<div class="app" id="app">
+<header class="top glass">
+<div class="brand">
+<svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7cc0ff"/><stop offset="1" stop-color="#1f6fd6"/></linearGradient></defs><path d="M6 20c0-6 4-11 10-11s10 5 10 11c0 3-2 5-5 5H11c-3 0-5-2-5-5z" fill="url(#lg)" opacity=".9"/><circle cx="9" cy="9" r="3" fill="#1f6fd6"/><circle cx="23" cy="9" r="3" fill="#1f6fd6"/><path d="M11 18h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+<div><b>Dog Fashion Studio <span class="beta">Beta</span></b><small>Diseño 3D de ropa para perros</small></div>
+</div>
+<input id="projName" class="proj-name" value="Mi diseño" aria-label="Nombre del proyecto">
+<div class="top-actions">
+<button class="btn ghost icon" id="undoBtn" title="Deshacer (Ctrl+Z)" aria-label="Deshacer">↶</button>
+<button class="btn ghost icon" id="redoBtn" title="Rehacer (Ctrl+Y)" aria-label="Rehacer">↷</button>
+<button class="btn ghost" id="projectsBtn">Proyectos</button>
+<button class="btn" id="saveBtn" title="Guardar (Ctrl+S)">Guardar</button>
+<button class="btn ghost" id="guideBtn">Guía de diseño</button>
+<button class="btn ghost icon" id="keysBtn" title="Atajos de teclado (?)" aria-label="Atajos de teclado">⌨</button>
+</div>
+</header>
+<aside class="left glass panel">
+<nav class="tabs" role="tablist" data-group="left">
+<button class="tab on" data-tab="breeds">Razas</button>
+<button class="tab" data-tab="garments">Prendas</button>
+<button class="tab" data-tab="fabrics">Telas</button>
+</nav>
+<section class="pane on" data-pane="breeds">
+<input id="breedSearch" class="field" placeholder="Buscar raza…" aria-label="Buscar raza">
+<div id="breedList" class="breed-list"></div>
+<details class="fold" id="shapeFold">
+<summary>Forma del modelo</summary>
+<div id="shapeCtl"></div>
+</details>
+</section>
+<section class="pane" data-pane="garments">
+<div id="garmentList" class="card-grid"></div>
+<h4>Ajuste de la prenda</h4>
+<div id="garmentCtl"></div>
+</section>
+<section class="pane" data-pane="fabrics">
+<div id="fabricList" class="fabric-list"></div>
+<h4>Propiedades físicas</h4>
+<div id="fabricCtl"></div>
+<div class="row">
+<input id="customFabricName" class="field" placeholder="Nombre de tu tela" aria-label="Nombre de la tela personalizada">
+<button class="btn small" id="saveFabricBtn">Guardar tela</button>
+</div>
+</section>
+</aside>
+<aside class="right glass panel">
+<nav class="tabs" role="tablist" data-group="right">
+<button class="tab on" data-tab="color">Color</button>
+<button class="tab" data-tab="design">Diseño</button>
+<button class="tab" data-tab="fit">Medidas</button>
+<button class="tab" data-tab="model">Maqueta</button>
+</nav>
+<section class="pane on" data-pane="color">
+<div class="slots" id="slots"></div>
+<label class="lbl" for="slotColor">Color del espacio activo</label>
+<input type="color" id="slotColor" class="color-in">
+<h4>Armonías</h4>
+<div class="row wrap" id="harmonyBtns"></div>
+<div class="swatches" id="harmonySw"></div>
+<p class="hint" id="harmonyHint"></p>
+<div class="contrast" id="contrastBox"></div>
+<h4>Paletas que combinan</h4>
+<div id="paletteList" class="palette-list"></div>
+</section>
+<section class="pane" data-pane="design">
+<h4>Patrón de la tela</h4>
+<div id="patternGrid" class="pattern-grid"></div>
+<div id="patternCtl"></div>
+<label class="file-btn">Usar imagen como estampado<input type="file" id="patImg" accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
+<h4>Logo o texto</h4>
+<div class="row">
+<input id="decalText" class="field" placeholder="Texto (ej. MAX)" maxlength="24" aria-label="Texto del estampado">
+<input type="color" id="decalColor" value="#ffffff" class="color-in small" aria-label="Color del texto">
+</div>
+<div class="row">
+<select id="decalFont" class="field" aria-label="Tipografía">
+<option value="'Bricolage Grotesque', sans-serif">Grotesca</option>
+<option value="Georgia, serif">Serif clásica</option>
+<option value="'Courier New', monospace">Monoespaciada</option>
+<option value="Impact, 'Arial Black', sans-serif">Impacto</option>
+<option value="'Brush Script MT', cursive">Manuscrita</option>
+</select>
+<button class="btn small" id="decalTextBtn">Poner texto</button>
+</div>
+<label class="file-btn">Subir logo (PNG, SVG…)<input type="file" id="decalImg" accept="image/png,image/jpeg,image/webp,image/svg+xml"></label>
+<div id="decalCtl"></div>
+<h4>Detalles</h4>
+<div id="detailCtl"></div>
+</section>
+<section class="pane" data-pane="fit">
+<div id="measureBox"></div>
+<h4>Perfil de mi perro</h4>
+<p class="hint">Escribe las medidas reales en centímetros y la maqueta se ajusta a ellas.</p>
+<div class="grid2">
+<label class="lbl">Nombre<input id="pfName" class="field" placeholder="Luna"></label>
+<label class="lbl">Cuello (cm)<input id="pfNeck" class="field" type="number" min="8" max="90" step="0.5"></label>
+<label class="lbl">Pecho (cm)<input id="pfChest" class="field" type="number" min="15" max="130" step="0.5"></label>
+<label class="lbl">Espalda (cm)<input id="pfBack" class="field" type="number" min="10" max="110" step="0.5"></label>
+</div>
+<div class="row"><button class="btn small" id="pfApply">Ajustar maqueta</button><button class="btn small ghost" id="pfSave">Guardar perfil</button></div>
+<div id="profileList" class="profile-list"></div>
+<h4>Prenda</h4>
+<div id="garmentStats"></div>
+</section>
+<section class="pane" data-pane="model">
+<label class="lbl" for="mdlMat">Material</label>
+<select id="mdlMat" class="field">
+<option value="0">Cristal</option><option value="1">Cerámica</option><option value="2">Mate (arcilla)</option><option value="3">Metal pulido</option>
+</select>
+<div class="row"><label class="lbl grow" for="mdlColor">Color</label><input type="color" id="mdlColor" class="color-in small" value="#ffffff"><button class="btn small ghost" id="mdlWhite">Blanco</button></div>
+<div id="modelCtl"></div>
+<label class="lbl" for="mdlTex">Textura</label>
+<select id="mdlTex" class="field">
+<option value="0">Lisa</option><option value="1">Manchas</option><option value="2">Dálmata</option><option value="3">Atigrado</option><option value="4">Pelaje</option><option value="5">Silla (lomo oscuro)</option>
+</select>
+<div class="row"><label class="lbl grow" for="mdlColor2">Segundo color de textura</label><input type="color" id="mdlColor2" class="color-in small" value="#7a5a3c"></div>
+</section>
+</aside>
+<footer class="bottom glass">
+<button class="btn" id="playBtn" title="Simulación (Espacio)">❚❚ Pausar</button>
+<button class="btn ghost" id="resetClothBtn" title="Reiniciar tela (R)">↺ Reiniciar tela</button>
+<label class="mini">Viento<input type="range" id="wind" min="0" max="1" step="0.01" value="0"></label>
+<label class="mini">Pose
+<select id="pose" class="field slim"><option value="0">De pie</option><option value="1">Caminar</option><option value="2">Trotar</option></select>
+</label>
+<span class="sep"></span>
+<button class="btn ghost" id="spinBtn" title="Girar 360° (A)">360°</button>
+<div class="seg" role="group" aria-label="Vistas">
+<button data-view="0" title="Vista 3/4 (1)">3/4</button><button data-view="1" title="Lado (2)">Lado</button><button data-view="2" title="Frente (3)">Frente</button><button data-view="3" title="Arriba (4)">Arriba</button><button data-view="4" title="Atrás (5)">Atrás</button>
+</div>
+<button class="btn ghost" id="wireBtn" title="Malla (W)">Malla</button>
+<button class="btn ghost" id="photoBtn" title="Foto (F)">Foto</button>
+<span class="sep"></span>
+<label class="mini">Calidad
+<select id="quality" class="field slim"><option value="auto">Auto</option><option value="0">Baja</option><option value="1">Media</option><option value="2">Alta</option></select>
+</label>
+<span class="fps" id="fps">— fps</span>
+</footer>
+<div class="msw glass" role="tablist" aria-label="Paneles">
+<button class="btn" id="mswLeft">Perro, prenda y tela</button>
+<button class="btn ghost" id="mswRight">Color y diseño</button>
+</div>
+<div class="tips glass" id="tips" aria-live="polite"></div>
+<div class="viewhint" id="viewHint">Arrastra para girar · rueda para acercar · arrastra la tela para moverla · doble clic en la tela pone o quita un alfiler</div>
+</div>
+<div class="modal" id="modal" hidden>
+<div class="modal-card glass">
+<button class="close" id="modalClose" aria-label="Cerrar">✕</button>
+<div id="modalBody"></div>
+</div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<div class="glfail" id="glfail" hidden>
+<div class="glass modal-card"><h2>Tu navegador no tiene WebGL 2</h2><p>Dog Fashion Studio necesita WebGL 2 para la vista 3D. Activa la aceleración por hardware en tu navegador o abre la app en Chrome, Edge o Firefox actualizados.</p></div>
+</div>
+<script>
+(function(){
+'use strict';
+const M4 = {
+persp(fovy, asp, n, f) { const t = 1 / Math.tan(fovy / 2), o = new Float32Array(16); o[0] = t / asp; o[5] = t; o[10] = (f + n) / (n - f); o[11] = -1; o[14] = 2 * f * n / (n - f); return o; },
+ortho(l, r, b, t, n, f) { const o = new Float32Array(16); o[0] = 2 / (r - l); o[5] = 2 / (t - b); o[10] = -2 / (f - n); o[12] = -(r + l) / (r - l); o[13] = -(t + b) / (t - b); o[14] = -(f + n) / (f - n); o[15] = 1; return o; },
+lookAt(e, c, u) {
+let zx = e[0] - c[0], zy = e[1] - c[1], zz = e[2] - c[2]; let l = Math.hypot(zx, zy, zz); zx /= l; zy /= l; zz /= l;
+let xx = u[1] * zz - u[2] * zy, xy = u[2] * zx - u[0] * zz, xz = u[0] * zy - u[1] * zx; l = Math.hypot(xx, xy, xz); xx /= l; xy /= l; xz /= l;
+const yx = zy * xz - zz * xy, yy = zz * xx - zx * xz, yz = zx * xy - zy * xx;
+const o = new Float32Array(16);
+o[0] = xx; o[1] = yx; o[2] = zx; o[4] = xy; o[5] = yy; o[6] = zy; o[8] = xz; o[9] = yz; o[10] = zz;
+o[12] = -(xx * e[0] + xy * e[1] + xz * e[2]); o[13] = -(yx * e[0] + yy * e[1] + yz * e[2]); o[14] = -(zx * e[0] + zy * e[1] + zz * e[2]); o[15] = 1; return o;
+},
+mul(a, b) { const o = new Float32Array(16); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; o[i * 4 + j] = s; } return o; },
+inv(m) {
+const a00 = m[0], a01 = m[1], a02 = m[2], a03 = m[3], a10 = m[4], a11 = m[5], a12 = m[6], a13 = m[7], a20 = m[8], a21 = m[9], a22 = m[10], a23 = m[11], a30 = m[12], a31 = m[13], a32 = m[14], a33 = m[15];
+const b00 = a00 * a11 - a01 * a10, b01 = a00 * a12 - a02 * a10, b02 = a00 * a13 - a03 * a10, b03 = a01 * a12 - a02 * a11, b04 = a01 * a13 - a03 * a11, b05 = a02 * a13 - a03 * a12;
+const b06 = a20 * a31 - a21 * a30, b07 = a20 * a32 - a22 * a30, b08 = a20 * a33 - a23 * a30, b09 = a21 * a32 - a22 * a31, b10 = a21 * a33 - a23 * a31, b11 = a22 * a33 - a23 * a32;
+let det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06; if (!det) return null; det = 1 / det;
+const o = new Float32Array(16);
+o[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det; o[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det; o[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det; o[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+o[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det; o[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det; o[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det; o[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+o[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det; o[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det; o[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det; o[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+o[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det; o[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det; o[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det; o[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+return o;
+}
+};
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+const P_TORSO = 1, P_NECK = 2, P_HEAD = 4, P_SNOUT = 8, P_EAR = 16, P_LEG = 32, P_TAIL = 64;
+function smin(a, b, k) { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; }
+function sdEll(x, y, z, rx, ry, rz) {
+const k0 = Math.sqrt((x / rx) ** 2 + (y / ry) ** 2 + (z / rz) ** 2);
+const k1 = Math.sqrt((x / (rx * rx)) ** 2 + (y / (ry * ry)) ** 2 + (z / (rz * rz)) ** 2);
+return k1 < 1e-12 ? -Math.min(rx, ry, rz) : k0 * (k0 - 1) / k1;
+}
+function sdRC(px, py, pz, bx, by, bz, r1, r2) {
+const l2 = bx * bx + by * by + bz * bz, rr = r1 - r2, a2 = l2 - rr * rr, il2 = 1 / l2;
+const y = px * bx + py * by + pz * bz, z = y - l2;
+const qx = px * l2 - bx * y, qy = py * l2 - by * y, qz = pz * l2 - bz * y;
+const x2 = qx * qx + qy * qy + qz * qz, y2 = y * y * l2, z2 = z * z * l2;
+const k = Math.sign(rr) * rr * rr * x2;
+if (Math.sign(z) * a2 * z2 > k) return Math.sqrt(x2 + z2) * il2 - r2;
+if (Math.sign(y) * a2 * y2 < k) return Math.sqrt(x2 + y2) * il2 - r1;
+return (Math.sqrt(x2 * a2 * il2) + y * rr) * il2 - r1;
+}
+function primDist(p, x, y, z) {
+let lx = x - p.cx, ly = y - p.cy, lz = z - p.cz;
+if (p.t === 0) return sdEll(lx, ly, lz, p.rx, p.ry, p.rz);
+if (p.fa === 0) { lx /= p.fl; return sdRC(lx, ly, lz, p.ex / p.fl, p.ey, p.ez, p.r1, p.r2) * p.fl; }
+if (p.fa === 2) { lz /= p.fl; return sdRC(lx, ly, lz, p.ex, p.ey, p.ez / p.fl, p.r1, p.r2) * p.fl; }
+return sdRC(lx, ly, lz, p.ex, p.ey, p.ez, p.r1, p.r2);
+}
+function buildDog(bp, ph = 0, amp = 0) {
+const H = bp.h, prims = [];
+const g = bp.girth || 1;
+const legH = H * bp.leg, depth = H - legH, rc = depth * 0.5 * g;
+const yc = legH + depth * 0.5;
+const bodyLen = H * bp.len, xs = bodyLen / 2, xh = -bodyLen / 2, wid = bp.wid;
+function E(cx, cy, cz, rx, ry, rz, k, pm) { prims.push({ t: 0, cx, cy, cz, rx, ry, rz, k, pm, bx: cx, by: cy, bz: cz, br: Math.max(rx, ry, rz) }); }
+function R(a, b, r1, r2, k, pm, fa = -1, fl = 1) {
+const ex = b[0] - a[0], ey = b[1] - a[1], ez = b[2] - a[2];
+prims.push({ t: 2, cx: a[0], cy: a[1], cz: a[2], ex, ey, ez, r1, r2, k, pm, fa, fl, bx: a[0] + ex / 2, by: a[1] + ey / 2, bz: a[2] + ez / 2, br: Math.hypot(ex, ey, ez) / 2 + Math.max(r1, r2) });
+}
+const kT = rc * 0.45;
+E(xs * 0.42, yc + rc * 0.02, 0, rc * 1.1 + bodyLen * 0.12, rc, rc * wid, kT, P_TORSO);
+const w = bp.waist, ar = rc * Math.min(w, wid * 0.95 + 0.05);
+R([xs * 0.2, yc + rc * (1 - w) * 0.55, 0], [xh * 0.5, yc + rc * (1 - w) * 0.8, 0], ar, ar * 0.97, kT, P_TORSO);
+E(xh * 0.78, yc + rc * 0.1, 0, rc * 0.95, rc * 0.84, rc * wid * 0.88, kT, P_TORSO);
+const na = (bp.neckA || 50) * Math.PI / 180, nL = rc * 1.25 * bp.neck, rn = rc * 0.54 * bp.neckT;
+const n0 = [xs * 0.82, yc + rc * 0.35, 0], n1 = [n0[0] + Math.cos(na) * nL, n0[1] + Math.sin(na) * nL, 0];
+R(n0, n1, rn, rn * 0.88, rc * 0.35, P_NECK);
+const hr = rc * 0.58 * bp.head;
+const hc = [n1[0] + hr * 0.3, n1[1] + hr * 0.42, 0];
+E(hc[0], hc[1], 0, hr * 1.05, hr * 0.92, hr * 0.84, hr * 0.3, P_HEAD);
+const sl = hr * 1.15 * bp.snout, sr = hr * 0.52 * bp.muzzle;
+const s0 = [hc[0] + hr * 0.32, hc[1] - hr * 0.3, 0], s1 = [s0[0] + sl, s0[1] - sl * 0.12, 0];
+R(s0, s1, sr, sr * 0.78, hr * 0.28, P_SNOUT);
+E(s1[0] + sr * 0.55, s1[1] + sr * 0.18, 0, sr * 0.38, sr * 0.3, sr * 0.42, sr * 0.2, P_SNOUT);
+const es = bp.earS;
+for (const s of [1, -1]) {
+if (bp.ear === 'floppy') {
+E(hc[0] - hr * 0.1, hc[1] - hr * 0.32 * es, s * hr * 0.96, hr * 0.44 * es, hr * 0.8 * es, hr * 0.14, hr * 0.07, P_EAR);
+} else {
+let dir, len, r1, r2, base = [hc[0] - hr * 0.15, hc[1] + hr * 0.6, s * hr * 0.46], fl = 0.36;
+if (bp.ear === 'bat') { dir = [-0.05, 1, s * 0.5]; len = hr * 1.0 * es; r1 = hr * 0.42 * es; r2 = hr * 0.17 * es; }
+else if (bp.ear === 'semi') { dir = [0.6, 0.62, s * 0.5]; len = hr * 0.62 * es; r1 = hr * 0.3 * es; r2 = hr * 0.12 * es; fl = 0.4; }
+else { dir = [-0.18, 1, s * 0.32]; len = hr * 1.05 * es; r1 = hr * 0.33 * es; r2 = hr * 0.05; }
+const dl = Math.hypot(...dir);
+R(base, [base[0] + dir[0] / dl * len, base[1] + dir[1] / dl * len, base[2] + dir[2] / dl * len], r1, r2, hr * 0.15, P_EAR, 0, fl);
+}
+}
+const lr = rc * 0.27 * bp.legT;
+const rot = (a, L) => [Math.sin(a) * L, -Math.cos(a) * L];
+const legs = [];
+for (const s of [1, -1]) { // front
+const off = s > 0 ? 0 : Math.PI;
+const th = amp * 0.42 * Math.sin(ph + off), flex = amp * 1.1 * Math.max(0, Math.sin(ph + off + Math.PI * 0.5));
+const J = [xs * 0.66, yc - rc * 0.25, s * rc * wid * 0.5];
+const Lg = J[1] - lr * 0.85;
+const u = rot(th, Lg * 0.5), E1 = [J[0] + u[0], J[1] + u[1], J[2]];
+const v = rot(th - flex, Lg * 0.5), P1 = [E1[0] + v[0], E1[1] + v[1], J[2]];
+R(J, E1, lr * 1.5, lr * 1.0, lr * 0.8, P_LEG); R(E1, P1, lr * 1.0, lr * 0.82, lr * 0.4, P_LEG);
+E(P1[0] + lr * 0.35, P1[1], J[2], lr * 1.25, lr * 0.85, lr * 1.05, lr * 0.4, P_LEG);
+legs.push({ J, E: E1, P: P1, front: true, s });
+}
+for (const s of [1, -1]) { // rear
+const off = s > 0 ? Math.PI : 0;
+const th = amp * 0.38 * Math.sin(ph + off), flex = amp * 0.7 * Math.max(0, Math.sin(ph + off + Math.PI * 0.5));
+const J = [xh * 0.78, yc + rc * 0.05, s * rc * wid * 0.5];
+const Lg = J[1] - lr * 0.85;
+const a = rot(th + 0.35, Lg * 0.45), K = [J[0] + a[0], J[1] + a[1], J[2]];
+const b = rot(th - 0.55 - flex * 0.5, Lg * 0.42), Hk = [K[0] + b[0], K[1] + b[1], J[2]];
+const mL = Math.max(Hk[1] - lr * 0.85, Lg * 0.1);
+const c = rot(th * 0.6 + flex * 0.9, mL), Pw = [Hk[0] + c[0], Hk[1] + c[1], J[2]];
+R(J, K, lr * 2.05, lr * 1.2, rc * 0.3, P_LEG); R(K, Hk, lr * 1.15, lr * 0.8, lr * 0.4, P_LEG); R(Hk, Pw, lr * 0.8, lr * 0.75, lr * 0.3, P_LEG);
+E(Pw[0] + lr * 0.35, Pw[1], J[2], lr * 1.2, lr * 0.82, lr * 1.0, lr * 0.4, P_LEG);
+legs.push({ J, E: K, P: Pw, front: false, s });
+}
+const TT = { down: [200, 235, 250], up: [148, 122, 108], curl: [112, 62, 12], saber: [212, 248, 256], otter: [194, 208, 214], stub: [165] };
+const angs = TT[bp.tail] || TT.down;
+const tl = H * bp.tailL * (bp.tail === 'stub' ? 0.18 : 1);
+let tp = [xh * 0.78 - rc * 0.78, yc + rc * 0.42, 0];
+const n = angs.length, wag = amp * 0.25;
+for (let i = 0; i < n; i++) {
+const a = angs[i] * Math.PI / 180, L = tl / n;
+const nz = Math.sin(ph * 2) * wag * tl * (i + 1) / n;
+const np = [tp[0] + Math.cos(a) * L, tp[1] + Math.sin(a) * L, nz];
+const r1 = lr * 0.72 * (1 - i / n * 0.6) * (bp.tailT || 1), r2 = lr * 0.72 * (1 - (i + 1) / n * 0.6) * (bp.tailT || 1);
+R(tp, np, r1, r2, i === 0 ? lr * 0.7 : lr * 0.3, P_TAIL);
+tp = np;
+}
+const fluff = H * (bp.fluff || 0);
+let mn = [1e9, 0, 1e9], mx = [-1e9, -1e9, -1e9];
+for (const p of prims) for (let a = 0; a < 3; a++) { const c = [p.bx, p.by, p.bz][a]; mn[a] = Math.min(mn[a], c - p.br); mx[a] = Math.max(mx[a], c + p.br); }
+mn[1] = 0;
+const hood = [hc[0] - hr * 0.15, hc[1] + hr * 0.3, 0];
+return {
+prims, fluff, H, rc, hr, lr, yc, xs, xh, legH, wid, legs, n0, n1, hc, bp,
+axisPts: [[xh * 0.95, yc + rc * 0.12], [xh * 0.35, yc + rc * 0.05], [xs * 0.3, yc + rc * 0.02], n0.slice(0, 2), [(n0[0] + n1[0]) / 2, (n0[1] + n1[1]) / 2], n1.slice(0, 2), hood.slice(0, 2)],
+bounds: { min: mn, max: mx }
+};
+}
+function sdfDog(dog, x, y, z, mask = 127) {
+let d = 1e9;
+const P = dog.prims;
+for (let i = 0; i < P.length; i++) {
+const p = P[i]; if (!(p.pm & mask)) continue;
+const dx = x - p.bx, dy = y - p.by, dz = z - p.bz;
+if (d < 1e8 && Math.sqrt(dx * dx + dy * dy + dz * dz) - p.br >= d + p.k) continue;
+const di = primDist(p, x, y, z);
+d = d > 1e8 ? di : smin(d, di, p.k);
+}
+return d - dog.fluff;
+}
+function buildGrid(dog, res) {
+const b = dog.bounds, pad = dog.H * 0.1 + dog.fluff;
+const ox = b.min[0] - pad, oy = -dog.H * 0.04, oz = b.min[2] - pad;
+const ex = b.max[0] + pad - ox, ey = b.max[1] + pad - oy, ez = b.max[2] + pad - oz;
+const h = Math.max(ex, ey, ez) / res;
+const nx = Math.ceil(ex / h) + 1, ny = Math.ceil(ey / h) + 1, nz = Math.ceil(ez / h) + 1;
+const F = new Float32Array(nx * ny * nz);
+let q = 0;
+for (let k = 0; k < nz; k++) { const z = oz + k * h; for (let j = 0; j < ny; j++) { const y = oy + j * h; for (let i = 0; i < nx; i++) F[q++] = sdfDog(dog, ox + i * h, y, z); } }
+return { F, nx, ny, nz, ox, oy, oz, h };
+}
+function sampleGrid(G, x, y, z, n) {
+const fx = (x - G.ox) / G.h, fy = (y - G.oy) / G.h, fz = (z - G.oz) / G.h;
+if (fx < 0 || fy < 0 || fz < 0 || fx >= G.nx - 1 || fy >= G.ny - 1 || fz >= G.nz - 1) return 1e9;
+const i = fx | 0, j = fy | 0, k = fz | 0, tx = fx - i, ty = fy - j, tz = fz - k;
+const nx = G.nx, nxy = G.nx * G.ny, F = G.F, b = i + nx * j + nxy * k;
+const c000 = F[b], c100 = F[b + 1], c010 = F[b + nx], c110 = F[b + nx + 1], c001 = F[b + nxy], c101 = F[b + nxy + 1], c011 = F[b + nxy + nx], c111 = F[b + nxy + nx + 1];
+const ux = 1 - tx, uy = 1 - ty, uz = 1 - tz;
+const d = ((c000 * ux + c100 * tx) * uy + (c010 * ux + c110 * tx) * ty) * uz + ((c001 * ux + c101 * tx) * uy + (c011 * ux + c111 * tx) * ty) * tz;
+if (n) {
+let gx = ((c100 - c000) * uy + (c110 - c010) * ty) * uz + ((c101 - c001) * uy + (c111 - c011) * ty) * tz;
+let gy = ((c010 - c000) * ux + (c110 - c100) * tx) * uz + ((c011 - c001) * ux + (c111 - c101) * tx) * tz;
+let gz = ((c001 - c000) * ux + (c101 - c100) * tx) * uy + ((c011 - c010) * ux + (c111 - c110) * tx) * ty;
+const l = Math.hypot(gx, gy, gz) || 1; n[0] = gx / l; n[1] = gy / l; n[2] = gz / l;
+}
+return d;
+}
+const EDGES = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+function surfaceNets(G) {
+const { F, nx, ny, nz, ox, oy, oz, h } = G, nxy = nx * ny;
+const cnx = nx - 1, cny = ny - 1, cnz = nz - 1;
+const cidx = new Int32Array(cnx * cny * cnz).fill(-1);
+const P = [];
+const v = new Float32Array(8);
+for (let k = 0; k < cnz; k++) for (let j = 0; j < cny; j++) for (let i = 0; i < cnx; i++) {
+let mask = 0; const b = i + nx * j + nxy * k;
+for (let c = 0; c < 8; c++) { const val = F[b + (c & 1) + ((c >> 1) & 1) * nx + ((c >> 2) & 1) * nxy]; v[c] = val; if (val < 0) mask |= 1 << c; }
+if (mask === 0 || mask === 255) continue;
+let sx = 0, sy = 0, sz = 0, cnt = 0;
+for (const [a, bb] of EDGES) {
+const va = v[a], vb = v[bb];
+if ((va < 0) === (vb < 0)) continue;
+const t = va / (va - vb);
+sx += (a & 1) + ((bb & 1) - (a & 1)) * t; sy += ((a >> 1) & 1) + (((bb >> 1) & 1) - ((a >> 1) & 1)) * t; sz += ((a >> 2) & 1) + (((bb >> 2) & 1) - ((a >> 2) & 1)) * t; cnt++;
+}
+cidx[i + cnx * (j + cny * k)] = P.length / 3;
+P.push(ox + (i + sx / cnt) * h, oy + (j + sy / cnt) * h, oz + (k + sz / cnt) * h);
+}
+const pos = new Float32Array(P), nV = pos.length / 3, nrm = new Float32Array(pos.length), tmp = [0, 0, 0];
+for (let q = 0; q < nV; q++) { // snap to the isosurface and take the field gradient as normal
+let x = pos[q * 3], y = pos[q * 3 + 1], z = pos[q * 3 + 2];
+const d = sampleGrid(G, x, y, z, tmp);
+if (d < 1e8) { x -= tmp[0] * d; y -= tmp[1] * d; z -= tmp[2] * d; sampleGrid(G, x, y, z, tmp); }
+pos[q * 3] = x; pos[q * 3 + 1] = y; pos[q * 3 + 2] = z; nrm[q * 3] = tmp[0]; nrm[q * 3 + 1] = tmp[1]; nrm[q * 3 + 2] = tmp[2];
+}
+const I = [];
+const C = (i, j, k) => cidx[i + cnx * (j + cny * k)];
+function quad(a, b, c, d) {
+if (a < 0 || b < 0 || c < 0 || d < 0) return;
+const ax = pos[b * 3] - pos[a * 3], ay = pos[b * 3 + 1] - pos[a * 3 + 1], az = pos[b * 3 + 2] - pos[a * 3 + 2];
+const bx = pos[c * 3] - pos[a * 3], by = pos[c * 3 + 1] - pos[a * 3 + 1], bz = pos[c * 3 + 2] - pos[a * 3 + 2];
+const cx = ay * bz - az * by, cy = az * bx - ax * bz, cz = ax * by - ay * bx;
+const dot = cx * (nrm[a * 3] + nrm[c * 3]) + cy * (nrm[a * 3 + 1] + nrm[c * 3 + 1]) + cz * (nrm[a * 3 + 2] + nrm[c * 3 + 2]);
+if (dot >= 0) I.push(a, b, c, a, c, d); else I.push(a, c, b, a, d, c);
+}
+for (let k = 1; k < cnz; k++) for (let j = 1; j < cny; j++) for (let i = 0; i < cnx; i++) { // x edges
+const b = i + nx * j + nxy * k; if ((F[b] < 0) === (F[b + 1] < 0)) continue;
+quad(C(i, j - 1, k - 1), C(i, j, k - 1), C(i, j, k), C(i, j - 1, k));
+}
+for (let k = 1; k < cnz; k++) for (let j = 0; j < cny; j++) for (let i = 1; i < cnx; i++) { // y edges
+const b = i + nx * j + nxy * k; if ((F[b] < 0) === (F[b + nx] < 0)) continue;
+quad(C(i - 1, j, k - 1), C(i, j, k - 1), C(i, j, k), C(i - 1, j, k));
+}
+for (let k = 0; k < cnz; k++) for (let j = 1; j < cny; j++) for (let i = 1; i < cnx; i++) { // z edges
+const b = i + nx * j + nxy * k; if ((F[b] < 0) === (F[b + nxy] < 0)) continue;
+quad(C(i - 1, j - 1, k), C(i, j - 1, k), C(i, j, k), C(i - 1, j, k));
+}
+return { pos, nrm, idx: new Uint32Array(I) };
+}
+function rayExit(dog, px, py, pz, dx, dy, dz, maxD, mask, step) {
+let s = 0, prev = 0;
+if (sdfDog(dog, px, py, pz, mask) > 0) return 0;
+while (s < maxD) {
+prev = s; s += step;
+if (sdfDog(dog, px + dx * s, py + dy * s, pz + dz * s, mask) >= 0) {
+let a = prev, b = s; for (let it = 0; it < 6; it++) { const m = (a + b) / 2; if (sdfDog(dog, px + dx * m, py + dy * m, pz + dz * m, mask) >= 0) b = m; else a = m; }
+return (a + b) / 2;
+}
+}
+return -1;
+}
+function girthAt(dog, c, T, mask) {
+const N = [-T[1], T[0], 0], n = 90, pts = [];
+for (let i = 0; i < n; i++) {
+const a = i / n * Math.PI * 2, d = [N[0] * Math.cos(a), N[1] * Math.cos(a), Math.sin(a)];
+let s = rayExit(dog, c[0], c[1], 0, d[0], d[1], d[2], dog.rc * 3, mask, dog.H * 0.004); if (s < 0) s = dog.rc;
+pts.push([c[0] + d[0] * s, c[1] + d[1] * s, d[2] * s]);
+}
+let L = 0; for (let i = 0; i < n; i++) { const a = pts[i], b = pts[(i + 1) % n]; L += Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); }
+return L;
+}
+function measureDog(dog) {
+const body = P_TORSO | P_NECK | P_HEAD;
+const nd = [dog.n1[0] - dog.n0[0], dog.n1[1] - dog.n0[1]], nl = Math.hypot(...nd);
+const neck = girthAt(dog, [dog.n0[0] + nd[0] * 0.55, dog.n0[1] + nd[1] * 0.55], [nd[0] / nl, nd[1] / nl], body);
+const fl = dog.legs[0];
+const chest = girthAt(dog, [fl.J[0] - dog.lr * 2.4, dog.yc], [1, 0], body | P_LEG);
+const waist = girthAt(dog, [dog.xh * 0.3, dog.yc + dog.rc * 0.2], [1, 0], body);
+const x0 = dog.n0[0], x1 = dog.xh * 0.78 - dog.rc * 0.78; let L = 0, prev = null;
+for (let i = 0; i <= 40; i++) {
+const x = x0 + (x1 - x0) * i / 40; const top = dog.yc + dog.rc * 3;
+let y = top; const st = dog.H * 0.004; while (y > 0 && sdfDog(dog, x, y, 0, body) > 0) y -= st;
+if (prev) L += Math.hypot(x - prev[0], y - prev[1]); prev = [x, y];
+}
+return { neck: neck * 100, chest: chest * 100, waist: waist * 100, back: L * 100, height: (dog.H + dog.fluff) * 100 };
+}
+function sizeFor(m) {
+const t = [[22, 'XXS'], [27, 'XS'], [33, 'S'], [40, 'M'], [50, 'L'], [60, 'XL'], [72, 'XXL']];
+for (const [b, s] of t) if (m.back < b) return s; return '3XL';
+}
+'use strict';
+/* ================= Garment catalogue =================
+t runs along the body axis: 0 = rump, 1 = middle of the neck, >1 = towards the head.
+theta = 0 is the back (dorsal line), ±π is the belly/throat. */
+const GARMENTS = {
+camiseta: { name: 'Camiseta', desc: 'Algodón fresco, manga corta', t0: .36, t1: 1.0, ease: .012, sleeves: .22, fabric: 'algodon', icon: 'M6 8l6-4h8l6 4-3 4-3-2v14H12V10l-3 2z' },
+hoodie: { name: 'Sudadera', desc: 'Capucha sobre el lomo', t0: .22, t1: 1.02, ease: .02, sleeves: .42, hood: true, fabric: 'polar', icon: 'M10 4c2-2 10-2 12 0l4 5-3 3-2-2v14H11V10l-2 2-3-3z' },
+sueter: { name: 'Suéter', desc: 'Punto, cuello alto', t0: .24, t1: 1.14, ease: .012, sleeves: .4, fabric: 'punto', icon: 'M11 3h10v4l5 3-3 4-2-2v13H11V12l-2 2-3-4 5-3z' },
+chaleco: { name: 'Chaleco', desc: 'Sin mangas, ligero', t0: .3, t1: .97, ease: .014, fabric: 'nylon', icon: 'M10 4h4l2 3 2-3h4l2 6v16H8V10z' },
+abrigo: { name: 'Abrigo', desc: 'Cubre lomo, correa al vientre', t0: .06, t1: 1.0, ease: .024, top: 118, strap: [.5, .63], collar: .9, fabric: 'lana', icon: 'M6 10c4-6 16-6 20 0v4H6z M10 14h12v10H10z' },
+impermeable: { name: 'Impermeable', desc: 'Con capucha y franja reflectiva', t0: .04, t1: 1.0, ease: .024, top: 122, strap: [.48, .61], collar: .9, hood: true, fabric: 'impermeable', reflective: true, icon: 'M16 3c6 0 10 4 10 9H6c0-5 4-9 10-9zM15 12h2v10a3 3 0 01-6 0h2a1 1 0 002 0z' },
+bandana: { name: 'Bandana', desc: 'Pañuelo anudado, triángulo al pecho', t0: .97, t1: 1.05, ease: .006, bandana: true, fabric: 'algodon', icon: 'M5 7h22L16 26z' },
+capa: { name: 'Capa', desc: 'Atada al cuello, cae con la física', t0: .93, t1: 1.0, ease: .006, cape: true, fabric: 'seda', icon: 'M8 5h16l4 20H4z' }
+};
+/* ================= Fabric library (physical presets) =================
+weight g/m², stretch & bend = XPBD compliance (bigger = softer), fric 0..1, thick mm,
+rough/spec/sheen = look, weave = micro texture id in the shader. */
+const FABRICS = {
+algodon: { name: 'Algodón', weight: 150, stretch: 4e-4, bend: 1.2, fric: .45, thick: 0.6, rough: .85, spec: .04, sheen: .25, weave: 1, swatch: '#f4efe6', note: 'Transpirable, fácil de estampar.' },
+poliester: { name: 'Poliéster', weight: 120, stretch: 3e-4, bend: 1.6, fric: .3, thick: 0.4, rough: .55, spec: .12, sheen: .15, weave: 1, swatch: '#e7eef7', note: 'Ideal para sublimación.' },
+nylon: { name: 'Nylon (cordura)', weight: 180, stretch: 1.5e-4, bend: .5, fric: .25, thick: 0.5, rough: .45, spec: .2, sheen: .1, weave: 2, swatch: '#cfd8e3', note: 'Resistente al roce, táctico.' },
+mezclilla: { name: 'Mezclilla', weight: 340, stretch: 1e-4, bend: .18, fric: .55, thick: 0.9, rough: .9, spec: .03, sheen: .1, weave: 3, swatch: '#3f5f8c', note: 'Rígida, ideal para chaquetas.' },
+lana: { name: 'Lana merino', weight: 280, stretch: 6e-4, bend: .7, fric: .6, thick: 1.6, rough: .95, spec: .02, sheen: .45, weave: 4, swatch: '#d9cdb8', note: 'Abriga incluso húmeda.' },
+polar: { name: 'Polar (fleece)', weight: 240, stretch: 9e-4, bend: 1.0, fric: .6, thick: 2.2, rough: 1, spec: .01, sheen: .6, weave: 5, swatch: '#e9e4f3', note: 'Suave y cálido, no se deshilacha.' },
+punto: { name: 'Punto (tejido)', weight: 260, stretch: 3e-3, bend: 1.4, fric: .6, thick: 2.0, rough: .95, spec: .02, sheen: .35, weave: 6, swatch: '#efe3d3', note: 'Elástico, para suéteres.' },
+malla: { name: 'Malla deportiva', weight: 110, stretch: 1.8e-3, bend: 2.5, fric: .35, thick: 0.5, rough: .6, spec: .1, sheen: .15, weave: 7, swatch: '#e3f3ee', note: 'Ventila, para climas cálidos.' },
+cuero: { name: 'Cuero sintético', weight: 420, stretch: 8e-5, bend: .06, fric: .5, thick: 1.2, rough: .4, spec: .25, sheen: .05, weave: 8, swatch: '#5b4030', note: 'Muy rígido, se usa en detalles.' },
+impermeable: { name: 'Impermeable (TPU)', weight: 170, stretch: 2e-4, bend: .45, fric: .2, thick: 0.4, rough: .22, spec: .5, sheen: 0, weave: 0, swatch: '#ffd34d', note: 'Repele el agua, no transpira.' },
+elastano: { name: 'Elastano (licra)', weight: 190, stretch: 8e-3, bend: 2.2, fric: .4, thick: 0.5, rough: .5, spec: .15, sheen: .2, weave: 0, swatch: '#f1c7d6', note: 'Se estira mucho, ajuste ceñido.' },
+seda: { name: 'Satén / seda', weight: 110, stretch: 3e-4, bend: 4.0, fric: .2, thick: 0.25, rough: .4, spec: .2, sheen: .9, weave: 9, swatch: '#c9353f', note: 'Cae fluida, brillo suave.' }
+};
+function makeAxis(pts) {
+let P = pts.map(p => p.slice());
+for (let it = 0; it < 3; it++) { // Chaikin, endpoints fixed
+const Q = [P[0]];
+for (let i = 0; i < P.length - 1; i++) {
+const a = P[i], b = P[i + 1];
+Q.push([a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]);
+}
+Q.push(P[P.length - 1]); P = Q;
+}
+const S = [0]; for (let i = 1; i < P.length; i++) S.push(S[i - 1] + Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]));
+let best = 0, bd = 1e9; for (let i = 0; i < P.length; i++) { const d = Math.hypot(P[i][0] - pts[4][0], P[i][1] - pts[4][1]); if (d < bd) { bd = d; best = i; } }
+const s1 = S[best], total = S[S.length - 1];
+function at(t) {
+const s = clamp(t * s1, 0, total);
+let lo = 0, hi = S.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (S[m] <= s) lo = m; else hi = m; }
+const f = (s - S[lo]) / ((S[hi] - S[lo]) || 1);
+const p = [P[lo][0] + (P[hi][0] - P[lo][0]) * f, P[lo][1] + (P[hi][1] - P[lo][1]) * f];
+const a = P[Math.max(lo - 1, 0)], b = P[Math.min(hi + 1, P.length - 1)];
+let tx = b[0] - a[0], ty = b[1] - a[1]; const l = Math.hypot(tx, ty) || 1;
+return { p, T: [tx / l, ty / l], s };
+}
+return { at, s1, tMax: total / s1 };
+}
+function garmentMask(t, th, gd, T0, T1) {
+if (t < T0 - 1e-6 || t > T1 + 1e-6) return false;
+if (!gd.top) return true;
+const a = Math.abs(th);
+if (a <= gd.top * Math.PI / 180) return true;
+if (gd.strap && t >= gd.strap[0] && t <= gd.strap[1]) return true;
+if (gd.collar && t >= T1 - (1 - gd.collar)) return true;
+return false;
+}
+const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+function findHoles(dog, axis, ease) {
+const holes = [], mask = P_TORSO | P_NECK;
+for (const L of dog.legs) {
+const dx = L.E[0] - L.J[0], dy = L.E[1] - L.J[1], len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+let Q = null;
+for (let s = 0; s <= len * 1.5; s += dog.H * 0.003) { const x = L.J[0] + ux * s, y = L.J[1] + uy * s; if (sdfDog(dog, x, y, L.J[2], mask) > ease * 0.5) { Q = [x, y, L.J[2]]; break; } }
+if (!Q) continue;
+let bt = 0, bd = 1e9;
+for (let t = -0.05; t <= 1.25; t += 0.002) { const A = axis.at(t); const d = Math.abs((Q[0] - A.p[0]) * A.T[0] + (Q[1] - A.p[1]) * A.T[1]); if (d < bd) { bd = d; bt = t; } }
+const A = axis.at(bt), N = [-A.T[1], A.T[0]], nc = (Q[0] - A.p[0]) * N[0] + (Q[1] - A.p[1]) * N[1];
+const rTube = Math.max(Math.hypot(nc, Q[2]), 1e-3);
+const R = (L.front ? dog.lr * 1.5 : dog.lr * 2.0) + ease + dog.lr * 0.35;
+holes.push({ t: bt, th: Math.atan2(Q[2], nc), rt: R / axis.s1, rth: R / rTube, L, Q });
+}
+return holes;
+}
+const holeRho = (t, th, h) => Math.hypot((t - h.t) / h.rt, angDiff(th, h.th) / h.rth);
+function buildGarment(dog, key, opt, q) {
+const gd = Object.assign({}, GARMENTS[key]);
+const axis = makeAxis(dog.axisPts);
+const H = dog.H, body = P_TORSO | P_NECK | P_HEAD;
+const pos = opt.pos || 0;
+const accessory = gd.bandana || gd.cape;
+const T1 = Math.min(gd.t1 + pos + (opt.collar === 'alto' && !accessory ? 0.12 : 0), 1.22);
+const T0 = accessory ? clamp(gd.t0 + pos, 0, T1 - 0.04) : clamp(gd.t1 - (gd.t1 - gd.t0) * (opt.len || 1) + pos, 0.0, T1 - 0.05);
+if (gd.strap) gd.strap = [gd.strap[0] + pos, gd.strap[1] + pos];
+const hood = !accessory && (opt.hood === 'on' || (opt.hood !== 'off' && opt.hood !== false && !!gd.hood));
+const ease = H * gd.ease + (accessory ? 0 : (opt.ease || 0) / 100);
+const nv = [32, 48, 60][q];
+const spacing = 2 * Math.PI * dog.rc * 0.95 / nv;
+const nu = clamp(Math.round((T1 - T0) * axis.s1 / spacing), accessory ? 2 : 5, 140);
+const rows = nu + 1, cols = nv;
+const holes = accessory ? [] : findHoles(dog, axis, ease);
+const GP = new Float32Array(rows * cols * 3), bad = new Uint8Array(rows * cols), DIR = new Float32Array(rows * cols * 3), HID = new Int8Array(rows * cols).fill(-1);
+const Tt = new Float32Array(rows), TH = new Float32Array(cols);
+const step = H * 0.005;
+for (let i = 0; i < rows; i++) {
+const t = T0 + (T1 - T0) * i / nu; Tt[i] = t;
+for (let j = 0; j < cols; j++) {
+const th = -Math.PI + 2 * Math.PI * j / cols; TH[j] = th;
+let tt = t, ta = th;
+for (let k = 0; k < holes.length; k++) { // pull points that fall inside a leg hole onto its rim
+const h = holes[k], dt = (t - h.t) / h.rt, da = angDiff(th, h.th) / h.rth, r = Math.hypot(dt, da);
+if (r < 1) { const rr = r || 1e-6; tt = h.t + dt / rr * h.rt; ta = h.th + da / rr * h.rth; HID[i * cols + j] = k; break; }
+}
+const A = axis.at(tt), N = [-A.T[1], A.T[0]], c = Math.cos(ta), sn = Math.sin(ta);
+const dx = N[0] * c, dy = N[1] * c, dz = sn, k3 = (i * cols + j) * 3;
+DIR[k3] = dx; DIR[k3 + 1] = dy; DIR[k3 + 2] = dz;
+let r = rayExit(dog, A.p[0], A.p[1], 0, dx, dy, dz, dog.rc * 2.6, body, step);
+if (r < 0) { r = dog.rc; bad[i * cols + j] = 1; }
+GP[k3] = A.p[0] + dx * (r + ease); GP[k3 + 1] = Math.max(A.p[1] + dy * (r + ease), 0.002); GP[k3 + 2] = dz * (r + ease);
+}
+}
+const cellKeep = new Uint8Array(nu * cols);
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols; j++) {
+const j2 = (j + 1) % cols;
+if (bad[i * cols + j] || bad[(i + 1) * cols + j] || bad[(i + 1) * cols + j2] || bad[i * cols + j2]) continue;
+const tc = (Tt[i] + Tt[i + 1]) / 2; let thc = TH[j] + Math.PI / cols; if (thc > Math.PI) thc -= 2 * Math.PI;
+if (!garmentMask(tc, thc, gd, T0, T1)) continue;
+if (holes.some(h => holeRho(tc, thc, h) < 1)) continue;
+cellKeep[i * cols + j] = 1;
+}
+const { U, V } = flatUV(GP, rows, cols, true);
+const ribbed = ['sueter', 'hoodie', 'camiseta'].includes(key) || opt.collar === 'alto';
+const piece = { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: true, DIR, HID, primary: !accessory, ribRows: ribbed ? [0, 1, nu - 1, nu] : accessory ? [0, nu] : [], ribTrim: !!opt.ribTrim };
+const pieces = [piece];
+if (hood) pieces.push(buildHood(dog, axis, T1, ease, q));
+const sl = (gd.sleeves || 0) * (opt.sleeves ?? 1);
+if (sl > 0.02) {
+largestIsland(cellKeep, nu, cols, true);
+const used = new Uint8Array(rows * cols);
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols; j++) if (cellKeep[i * cols + j]) { const j2 = (j + 1) % cols; used[i * cols + j] = used[(i + 1) * cols + j] = used[(i + 1) * cols + j2] = used[i * cols + j2] = 1; }
+holes.forEach((h, k) => {
+if (!h.L.front || h.t <= T0 || h.t >= T1) return;
+const rim = []; for (let g = 0; g < rows * cols; g++) if (used[g] && HID[g] === k) rim.push([GP[g * 3], GP[g * 3 + 1], GP[g * 3 + 2]]);
+if (rim.length >= 6) pieces.push(buildSleeve(dog, h, k, sl, ease, q, rim));
+});
+}
+if (gd.bandana) { pieces.push(buildFlap(dog, piece, Tt, TH, q, opt.len || 1)); pieces.push(...buildKnot(dog, piece, TH)); }
+if (gd.cape) pieces.push(buildCape(dog, axis, piece, 0, TH, ease, q, opt.len || 1));
+if (!accessory && opt.collar === 'solapa') pieces.push(buildLapel(dog, axis, T1, ease, q));
+if (!accessory && opt.collar === 'piel') pieces.push(buildFurCollar(dog, piece));
+if (!accessory && opt.cape) { const c = buildCape(dog, axis, piece, Math.max(0, nu - 2), TH, dog.H * 0.012, q, 1); c.extra += dog.H * 0.012; c.primary = false; c.trim = 1; pieces.push(c); }
+return assembleCloth(dog, pieces, gd, { T0, T1 });
+}
+function flatUV(GP, rows, cols, wrap) {
+const U = new Float32Array(rows), V = new Float32Array(rows * cols), top = wrap ? cols / 2 : (cols - 1) >> 1;
+const d = (a, b) => Math.hypot(GP[b * 3] - GP[a * 3], GP[b * 3 + 1] - GP[a * 3 + 1], GP[b * 3 + 2] - GP[a * 3 + 2]);
+for (let i = 1; i < rows; i++) U[i] = U[i - 1] + d((i - 1) * cols + top, i * cols + top);
+for (let i = 0; i < rows; i++) for (const dir of [1, -1]) {
+let acc = 0; const lim = wrap ? cols / 2 : (dir > 0 ? cols - 1 - top : top);
+for (let s = 1; s <= lim; s++) {
+const j0 = (top + dir * (s - 1) + cols) % cols, j1 = (top + dir * s + cols) % cols;
+acc += d(i * cols + j0, i * cols + j1);
+if (dir > 0 || s < lim || !wrap) V[i * cols + j1] = acc * dir;
+}
+}
+return { U, V };
+}
+function buildHood(dog, axis, T1, ease, q) {
+const body = P_TORSO | P_NECK | P_HEAD, H = dog.H, half = 95 * Math.PI / 180;
+const cols = [15, 21, 27][q], hoodLen = 0.28;
+const gap = ease + H * 0.016;
+const spacing = 2 * half * dog.rc / cols, nu = clamp(Math.round(hoodLen * axis.s1 / spacing), 4, 30), rows = nu + 1;
+const GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array(nu * cols).fill(1);
+for (let i = 0; i < rows; i++) {
+const lift = gap * (1 + 0.8 * Math.sin(Math.PI * i / nu));
+for (let j = 0; j < cols; j++) {
+const x = (j / (cols - 1)) * 2 - 1, Lj = 0.4 + 0.6 * Math.sqrt(Math.max(0, 1 - x * x)); // rounded hood tip, smooth edge
+const t = T1 - 0.02 - hoodLen * Lj * i / nu, A = axis.at(t), N = [-A.T[1], A.T[0]];
+const th = -half + 2 * half * j / (cols - 1), c = Math.cos(th), sn = Math.sin(th);
+const dx = N[0] * c, dy = N[1] * c, dz = sn, k = (i * cols + j) * 3;
+let r = rayExit(dog, A.p[0], A.p[1], 0, dx, dy, dz, dog.rc * 2.6, body, H * 0.006); if (r < 0) r = dog.rc;
+const off = r + (i === 0 ? ease : lift);
+GP[k] = A.p[0] + dx * off; GP[k + 1] = A.p[1] + dy * off; GP[k + 2] = dz * off;
+DIR[k] = dx; DIR[k + 1] = dy; DIR[k + 2] = dz;
+}
+}
+for (let i = 0; i < nu; i++) cellKeep[i * cols + cols - 1] = 0;
+const { U, V } = flatUV(GP, rows, cols, false);
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: false, DIR, sew: 'any', sewR: H * 0.08, extra: gap - ease + H * 0.004, ribRows: [] };
+}
+function buildSleeve(dog, hole, hk, frac, ease, q, rimPts) {
+const L = hole.L;
+const seg1 = [L.E[0] - L.J[0], L.E[1] - L.J[1]], l1 = Math.hypot(seg1[0], seg1[1]);
+const seg2 = [L.P[0] - L.E[0], L.P[1] - L.E[1]], l2 = Math.hypot(seg2[0], seg2[1]);
+const s0 = Math.min(Math.hypot(hole.Q[0] - L.J[0], hole.Q[1] - L.J[1]), l1 * 0.95);
+const len = frac * (l1 + l2 - s0) * 0.9;
+const at = s => { if (s <= l1) { const f = s / l1; return { p: [L.J[0] + seg1[0] * f, L.J[1] + seg1[1] * f], T: [seg1[0] / l1, seg1[1] / l1] }; } const f = Math.min((s - l1) / l2, 1); return { p: [L.E[0] + seg2[0] * f, L.E[1] + seg2[1] * f], T: [seg2[0] / l2, seg2[1] / l2] }; };
+const frame = A => { const T = [A.T[0], A.T[1], 0]; let N = [1 - T[0] * T[0], -T[0] * T[1], 0]; const nl = Math.hypot(N[0], N[1]) || 1; N = [N[0] / nl, N[1] / nl, 0]; const B = [T[1] * N[2] - T[2] * N[1], T[2] * N[0] - T[0] * N[2], T[0] * N[1] - T[1] * N[0]]; return { N, B }; };
+const A0 = at(s0), F0 = frame(A0), c0 = [A0.p[0], A0.p[1], L.J[2]];
+let rim = rimPts.map(p => { const r = [p[0] - c0[0], p[1] - c0[1], p[2] - c0[2]]; return { p, a: Math.atan2(r[0] * F0.B[0] + r[1] * F0.B[1] + r[2] * F0.B[2], r[0] * F0.N[0] + r[1] * F0.N[1] + r[2] * F0.N[2]) }; }).sort((x, y) => x.a - y.a);
+const minD = dog.lr * 0.12, clean = [];
+for (const r of rim) { const last = clean[clean.length - 1]; if (!last || Math.hypot(r.p[0] - last.p[0], r.p[1] - last.p[1], r.p[2] - last.p[2]) > minD) clean.push(r); }
+if (clean.length > 2 && Math.hypot(clean[0].p[0] - clean[clean.length - 1].p[0], clean[0].p[1] - clean[clean.length - 1].p[1], clean[0].p[2] - clean[clean.length - 1].p[2]) < minD) clean.pop();
+rim = clean;
+const cols = rim.length, circ = rim.reduce((acc, r, j) => { const n = rim[(j + 1) % cols].p; return acc + Math.hypot(n[0] - r.p[0], n[1] - r.p[1], n[2] - r.p[2]); }, 0);
+const spacing = circ / cols, nu = clamp(Math.round(len / spacing), 3, 50), rows = nu + 1;
+const GP = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array(nu * cols).fill(1), DIR = new Float32Array(rows * cols * 3);
+const e = ease * 0.6 + dog.H * 0.005;
+for (let i = 0; i < rows; i++) {
+const A = at(s0 + len * i / nu), F = frame(A), blend = Math.min(1, i / 2.5); const w = blend * blend * (3 - 2 * blend);
+for (let j = 0; j < cols; j++) {
+const ang = rim[j].a, c = Math.cos(ang), sn = Math.sin(ang);
+const d = [F.N[0] * c + F.B[0] * sn, F.N[1] * c + F.B[1] * sn, F.N[2] * c + F.B[2] * sn];
+let r = rayExit(dog, A.p[0], A.p[1], L.J[2], d[0], d[1], d[2], dog.lr * 3, P_LEG, dog.lr * 0.1);
+if (r < 0) r = dog.lr * 1.2;
+const tube = [A.p[0] + d[0] * (r + e), A.p[1] + d[1] * (r + e), L.J[2] + d[2] * (r + e)];
+const k = (i * cols + j) * 3, rp = rim[j].p;
+GP[k] = rp[0] + (tube[0] - rp[0]) * w; GP[k + 1] = rp[1] + (tube[1] - rp[1]) * w; GP[k + 2] = rp[2] + (tube[2] - rp[2]) * w;
+DIR[k] = d[0]; DIR[k + 1] = d[1]; DIR[k + 2] = d[2];
+}
+}
+const { U, V } = flatUV(GP, rows, cols, true);
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: true, DIR, sew: 'hole', hole: hk, ribRows: [nu - 1, nu] };
+}
+function buildLapel(dog, axis, T1, ease, q) {
+const H = dog.H, body = P_TORSO | P_NECK | P_HEAD, half = 150 * Math.PI / 180, cols = [24, 32, 40][q], rows = 7;
+const A = axis.at(T1 - 0.01), N = [-A.T[1], A.T[0]], T = A.T, colH = H * 0.1;
+const GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array((rows - 1) * cols);
+for (let j = 0; j < cols; j++) {
+const th = -half + 2 * half * j / (cols - 1), c = Math.cos(th), sn = Math.sin(th), d = [N[0] * c, N[1] * c, sn];
+let r = rayExit(dog, A.p[0], A.p[1], 0, d[0], d[1], d[2], dog.rc * 2.6, body, H * 0.004); if (r < 0) r = dog.rc * 0.6;
+for (let i = 0; i < rows; i++) {
+const f = i / (rows - 1), k = (i * cols + j) * 3;
+const up = Math.sin(f * Math.PI * 0.5) * colH * 0.35, out = f * colH * 0.95, back = f * f * colH * 0.7;
+const o = r + ease + H * 0.005 + out;
+GP[k] = A.p[0] + d[0] * o + T[0] * (up - back); GP[k + 1] = A.p[1] + d[1] * o + T[1] * (up - back); GP[k + 2] = d[2] * o;
+DIR[k] = d[0]; DIR[k + 1] = d[1]; DIR[k + 2] = d[2];
+}
+}
+for (let i = 0; i < rows - 1; i++) for (let j = 0; j < cols - 1; j++) cellKeep[i * cols + j] = 1;
+const { U, V } = flatUV(GP, rows, cols, false);
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: false, DIR, sew: 'any', sewR: H * 0.07, extra: H * 0.008, trim: 1, ribRows: [] };
+}
+function buildFurCollar(dog, body) {
+const H = dog.H, cols = body.cols, nb = body.rows - 1, k0 = Math.max(0, nb - 4), rows = nb - k0 + 1, puff = H * 0.03;
+const GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array((rows - 1) * cols), attach = [];
+for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+const g = (k0 + i) * cols + j, k = (i * cols + j) * 3, f = i / (rows - 1), o = puff * (0.35 + 0.9 * Math.sin(f * Math.PI));
+for (let a = 0; a < 3; a++) { GP[k + a] = body.GP[g * 3 + a] + body.DIR[g * 3 + a] * o; DIR[k + a] = body.DIR[g * 3 + a]; }
+attach.push([i * cols + j, g]);
+}
+for (let i = 0; i < rows - 1; i++) for (let j = 0; j < cols; j++) { const g = (k0 + i) * cols + j; cellKeep[i * cols + j] = body.cellKeep[g] || body.cellKeep[Math.max(0, g - cols)] ? 1 : 0; }
+const { U, V } = flatUV(GP, rows, cols, true);
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: true, DIR, sew: 'attach', attach, extra: puff * 0.6, trim: 2, ribRows: [] };
+}
+function buildFlap(dog, band, Tt, TH, q, lenF) {
+const cols0 = band.cols, phi = 62 * Math.PI / 180;
+const js = []; for (let j = 0; j < cols0; j++) if (Math.PI - Math.abs(TH[j]) <= phi) js.push(j);
+js.sort((a, b) => angDiff(TH[a], Math.PI) - angDiff(TH[b], Math.PI));
+const top = js.map(j => [band.GP[j * 3], band.GP[j * 3 + 1], band.GP[j * 3 + 2]]);
+const cols = top.length; let width = 0; for (let j = 1; j < cols; j++) width += Math.hypot(top[j][0] - top[j - 1][0], top[j][1] - top[j - 1][1], top[j][2] - top[j - 1][2]);
+const sp = width / (cols - 1), flapH = width * 0.62 * lenF, nu = clamp(Math.round(flapH / sp), 3, 40), rows = nu + 1;
+const C = top[cols >> 1];
+const GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array(nu * cols);
+for (let i = 0; i < rows; i++) {
+const f = i / nu;
+for (let j = 0; j < cols; j++) {
+const k = (i * cols + j) * 3, b = top[j], w = f * 0.94;
+GP[k] = b[0] + (C[0] - b[0]) * w + f * flapH * 0.35 + dog.H * 0.01 * f; GP[k + 1] = b[1] + (C[1] - b[1]) * w - f * flapH; GP[k + 2] = b[2] + (C[2] - b[2]) * w;
+DIR[k] = 1; DIR[k + 1] = 0; DIR[k + 2] = 0;
+}
+}
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols - 1; j++) cellKeep[i * cols + j] = 1;
+const U = new Float32Array(rows), V = new Float32Array(rows * cols);
+for (let i = 0; i < rows; i++) { U[i] = -i * sp; for (let j = 0; j < cols; j++) V[i * cols + j] = (j - (cols - 1) / 2) * sp * (1 - i / nu * 0.86); }
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: false, DIR, sew: 'any', sewR: dog.H * 0.04, primary: true, extra: dog.H * 0.004, ribRows: [] };
+}
+function buildKnot(dog, band, TH) {
+const out = [], cols0 = band.cols;
+let j0 = 0, bd = 9; for (let j = 0; j < cols0; j++) { const d = Math.abs(TH[j]); if (d < bd) { bd = d; j0 = j; } }
+const P = [band.GP[j0 * 3], band.GP[j0 * 3 + 1], band.GP[j0 * 3 + 2]], w = dog.H * 0.035, L = dog.H * 0.11;
+for (const side of [-1, 1]) {
+const rows = 6, cols = 3, GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array((rows - 1) * cols);
+for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+const f = i / (rows - 1), k = (i * cols + j) * 3;
+GP[k] = P[0] - f * L * 0.75 + (j - 1) * w * 0.4; GP[k + 1] = P[1] + dog.H * 0.012 - f * L * 0.6; GP[k + 2] = P[2] + side * (w * 0.4 + f * L * 0.35);
+DIR[k + 1] = 1;
+}
+for (let i = 0; i < rows - 1; i++) for (let j = 0; j < cols - 1; j++) cellKeep[i * cols + j] = 1;
+const U = new Float32Array(rows), V = new Float32Array(rows * cols);
+for (let i = 0; i < rows; i++) { U[i] = i * L / (rows - 1); for (let j = 0; j < cols; j++) V[i * cols + j] = (j - 1) * w * 0.4; }
+out.push({ rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: false, DIR, sew: 'any', sewR: dog.H * 0.06, extra: dog.H * 0.006, ribRows: [], trim: 0 });
+}
+return out;
+}
+function buildCape(dog, axis, base, row, TH, gapAdd, q, lenF) {
+const body = P_TORSO | P_NECK | P_HEAD, H = dog.H, half = 82 * Math.PI / 180;
+const js = []; for (let j = 0; j < base.cols; j++) if (Math.abs(TH[j]) <= half) js.push(j);
+js.sort((a, b) => TH[a] - TH[b]);
+const top = js.map(j => { const g = row * base.cols + j; return [base.GP[g * 3], base.GP[g * 3 + 1], base.GP[g * 3 + 2], row * base.cols + j]; });
+const cols = top.length;
+const tTop = 0.9, tB = -0.12 - 0.25 * (lenF - 1), A0 = axis.at(0);
+const bodyW = dog.rc * dog.wid * 2 * 2.7, topW = Math.abs(top[cols - 1][2] - top[0][2]) || dog.rc;
+const sp = bodyW / (cols - 1), Lw = (tTop - tB) * axis.s1, nu = clamp(Math.round(Lw / sp), 6, 70), rows = nu + 1;
+const GP = new Float32Array(rows * cols * 3), DIR = new Float32Array(rows * cols * 3), cellKeep = new Uint8Array(nu * cols);
+const gap = H * 0.03 + gapAdd;
+for (let i = 0; i < rows; i++) {
+const f = i / nu;
+if (i === 0) { for (let j = 0; j < cols; j++) { const k = j * 3; GP[k] = top[j][0]; GP[k + 1] = top[j][1]; GP[k + 2] = top[j][2]; DIR[k + 1] = 1; } continue; }
+const t = tTop + (tB - tTop) * f;
+let p;
+if (t >= 0) { const A = axis.at(t), N = [-A.T[1], A.T[0]]; const r = rayExit(dog, A.p[0], A.p[1], 0, N[0], N[1], 0, dog.rc * 2.6, body, H * 0.006); p = [A.p[0] + N[0] * ((r < 0 ? dog.rc : r) + gap), A.p[1] + N[1] * ((r < 0 ? dog.rc : r) + gap)]; }
+else { const N = [-A0.T[1], A0.T[0]]; const r = rayExit(dog, A0.p[0], A0.p[1], 0, N[0], N[1], 0, dog.rc * 2.6, body, H * 0.006); p = [A0.p[0] + A0.T[0] * t * axis.s1 + N[0] * ((r < 0 ? dog.rc : r) + gap), A0.p[1] + A0.T[1] * t * axis.s1 + N[1] * ((r < 0 ? dog.rc : r) + gap)]; }
+const blend = Math.min(1, f * 4), W = topW + (bodyW - topW) * Math.min(1, f * 2.2);
+for (let j = 0; j < cols; j++) {
+const z = (j / (cols - 1) - 0.5) * W, k = (i * cols + j) * 3, tp = top[j];
+const sx = p[0], sy = p[1] - (z * z) / (W * 0.5 + 1e-6) * 0.35;
+GP[k] = tp[0] + (sx - tp[0]) * blend; GP[k + 1] = tp[1] + (sy - tp[1]) * blend; GP[k + 2] = tp[2] + (z - tp[2]) * blend;
+DIR[k + 1] = 1;
+}
+}
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols - 1; j++) cellKeep[i * cols + j] = 1;
+const { U, V } = flatUV(GP, rows, cols, false);
+const uMaxC = U[rows - 1]; for (let i = 0; i < rows; i++) U[i] = uMaxC - U[i]; // run tail -> neck like the body pieces, so text reads correctly
+return { rows, cols, GP, UVu: U, UVv: V, cellKeep, wrap: false, DIR, sew: 'attach', attach: top.map((tp, j) => [j, tp[3]]), primary: true, extra: H * 0.004, ribRows: [] };
+}
+function largestIsland(keep, nu, cols, wrap) {
+const comp = new Int32Array(nu * cols).fill(-1); let best = -1, bestN = 0, id = 0;
+for (let s0 = 0; s0 < nu * cols; s0++) {
+if (!keep[s0] || comp[s0] >= 0) continue;
+const st = [s0]; comp[s0] = id; let n = 0;
+while (st.length) {
+const c = st.pop(); n++; const i = (c / cols) | 0, j = c % cols;
+const nb = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]];
+for (let [a, b] of nb) { if (a < 0 || a >= nu) continue; if (b < 0 || b >= cols) { if (!wrap) continue; b = (b + cols) % cols; } const k = a * cols + b; if (keep[k] && comp[k] < 0) { comp[k] = id; st.push(k); } }
+}
+if (n > bestN) { bestN = n; best = id; } id++;
+}
+for (let k = 0; k < nu * cols; k++) if (keep[k] && comp[k] !== best) keep[k] = 0;
+}
+function assembleCloth(dog, pieces, gd, meta) {
+const X = [], UV = [], tris = [], rtris = [], cons = [], restDir = [], pinned = [], extra = [], dups = [], rib = [], trim = [];
+let area = 0;
+const pieceRanges = [];
+let secondary = 0;
+for (const pc of pieces) {
+const { rows, cols, GP, cellKeep } = pc, nu = rows - 1, map = new Int32Array(rows * cols).fill(-1), dmap = new Int32Array(rows).fill(-1);
+largestIsland(cellKeep, nu, cols, pc.wrap);
+const uo = pc.primary ? 0 : 10 + 3 * (secondary++); // logo / reflective band live on the primary piece only
+const ribSet = new Set(pc.ribRows || []);
+const use = (i, j) => { const g = i * cols + j; if (map[g] < 0) { map[g] = X.length / 3; X.push(GP[g * 3], GP[g * 3 + 1], GP[g * 3 + 2]); UV.push(pc.UVu[i] + uo, pc.UVv[g]); restDir.push(pc.DIR[g * 3], pc.DIR[g * 3 + 1], pc.DIR[g * 3 + 2]); extra.push(pc.extra || 0); rib.push(ribSet.has(i) ? 1 : 0); trim.push(pc.trim || (pc.ribTrim && ribSet.has(i) ? 1 : 0)); } return map[g]; };
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols; j++) {
+if (!cellKeep[i * cols + j]) continue;
+const j2 = (j + 1) % cols; use(i, j); use(i + 1, j); use(i + 1, j2); use(i, j2);
+}
+const dupOf = i => { if (dmap[i] < 0) { const g = i * cols, last = i * cols + cols - 1; const seam = Math.hypot(GP[g * 3] - GP[last * 3], GP[g * 3 + 1] - GP[last * 3 + 1], GP[g * 3 + 2] - GP[last * 3 + 2]); dmap[i] = dups.length; dups.push([map[g], pc.UVu[i] + uo, pc.UVv[last] + seam]); } return -1 - dmap[i]; };
+let vote = 0;
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols; j++) {
+if (!cellKeep[i * cols + j]) continue;
+const j2 = (j + 1) % cols, a = map[i * cols + j], b = map[(i + 1) * cols + j], c = map[(i + 1) * cols + j2];
+const ax = X[b * 3] - X[a * 3], ay = X[b * 3 + 1] - X[a * 3 + 1], az = X[b * 3 + 2] - X[a * 3 + 2], bx = X[c * 3] - X[a * 3], by = X[c * 3 + 1] - X[a * 3 + 1], bz = X[c * 3 + 2] - X[a * 3 + 2];
+vote += Math.sign((ay * bz - az * by) * restDir[a * 3] + (az * bx - ax * bz) * restDir[a * 3 + 1] + (ax * by - ay * bx) * restDir[a * 3 + 2]);
+}
+const out = vote >= 0;
+for (let i = 0; i < nu; i++) for (let j = 0; j < cols; j++) {
+if (!cellKeep[i * cols + j]) continue;
+const j2 = (j + 1) % cols, wrapCell = pc.wrap && j2 === 0;
+const a = map[i * cols + j], b = map[(i + 1) * cols + j], c = map[(i + 1) * cols + j2], d = map[i * cols + j2];
+const rc = wrapCell ? dupOf(i + 1) : c, rd = wrapCell ? dupOf(i) : d;
+if (out) { tris.push(a, b, c, a, c, d); rtris.push(a, b, rc, a, rc, rd); } else { tris.push(a, c, b, a, d, c); rtris.push(a, rc, b, a, rd, rc); }
+const ax = X[b * 3] - X[a * 3], ay = X[b * 3 + 1] - X[a * 3 + 1], az = X[b * 3 + 2] - X[a * 3 + 2], bx = X[c * 3] - X[a * 3], by = X[c * 3 + 1] - X[a * 3 + 1], bz = X[c * 3 + 2] - X[a * 3 + 2];
+const cx = X[d * 3] - X[a * 3], cy = X[d * 3 + 1] - X[a * 3 + 1], cz = X[d * 3 + 2] - X[a * 3 + 2];
+area += Math.hypot(ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx) * 0.5 + Math.hypot(by * cz - bz * cy, bz * cx - bx * cz, bx * cy - by * cx) * 0.5;
+}
+const keepC = (i, j) => { if (i < 0 || i >= nu) return false; if (!pc.wrap && (j < 0 || j >= cols)) return false; return cellKeep[i * cols + ((j % cols) + cols) % cols] === 1; };
+const edge = new Set();
+const add = (i1, j1, i2, j2, kind) => {
+if (!pc.wrap && (j1 < 0 || j2 < 0 || j1 >= cols || j2 >= cols)) return false;
+j1 = (j1 + cols) % cols; j2 = (j2 + cols) % cols;
+if (i2 >= rows) return false;
+const a = map[i1 * cols + j1], b = map[i2 * cols + j2]; if (a < 0 || b < 0) return false;
+cons.push(a, b, kind); return true;
+};
+for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+if (i < nu && (keepC(i, j) || keepC(i, j - 1))) { if (add(i, j, i + 1, j, 0)) edge.add('u' + i + ',' + j); }
+if (keepC(i, j) || keepC(i - 1, j)) { if (add(i, j, i, j + 1, 1)) edge.add('v' + i + ',' + j); }
+if (keepC(i, j)) { add(i, j, i + 1, j + 1, 2); add(i + 1, j, i, j + 1, 2); }
+}
+for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) {
+if (edge.has('u' + i + ',' + j) && edge.has('u' + (i + 1) + ',' + j)) add(i, j, i + 2, j, 3);
+if (edge.has('v' + i + ',' + j) && edge.has('v' + i + ',' + ((j + 1) % cols))) add(i, j, i, j + 2, 3);
+}
+const holeRim = {};
+if (pc.HID) for (let g = 0; g < rows * cols; g++) if (pc.HID[g] >= 0 && map[g] >= 0) (holeRim[pc.HID[g]] = holeRim[pc.HID[g]] || []).push(map[g]);
+const row0 = []; for (let j = 0; j < cols; j++) if (map[j] >= 0) row0.push(map[j]);
+pieceRanges.push({ base: pieceRanges.length ? X.length / 3 : 0, pc, map, rows, cols, holeRim, row0, start: pieceRanges.length ? null : 0 });
+}
+{ let b = 0; for (const pr of pieceRanges) { pr.base = b; let mx = b; for (let g = 0; g < pr.map.length; g++) if (pr.map[g] >= 0) mx = Math.max(mx, pr.map[g] + 1); pr.end = mx; b = mx; } }
+let seams = 0;
+const body = pieceRanges[0];
+const P3 = i => [X[i * 3], X[i * 3 + 1], X[i * 3 + 2]];
+const dist = (a, b) => Math.hypot(X[a * 3] - X[b * 3], X[a * 3 + 1] - X[b * 3 + 1], X[a * 3 + 2] - X[b * 3 + 2]);
+const nearest = (p, cand, lim) => { let best = -1, bd = lim; for (const q of cand) { const d = dist(p, q); if (d < bd) { bd = d; best = q; } } return best; };
+const seen = new Set();
+const sew = (a, b) => { const k = Math.min(a, b) + ':' + Math.max(a, b); if (seen.has(k)) return; seen.add(k); cons.push(a, b, 4); seams++; };
+const bodyAll = []; for (let q = body.base; q < body.end; q++) bodyAll.push(q);
+for (const pr of pieceRanges.slice(1)) {
+const pc = pr.pc;
+if (pc.sew === 'hole') {
+const rim = body.holeRim[pc.hole] || [];
+const lim = dog.lr * 4;
+for (const p of pr.row0) { const q = nearest(p, rim.length ? rim : bodyAll, lim); if (q >= 0) sew(p, q); }
+for (const q of rim) { const p = nearest(q, pr.row0, lim); if (p >= 0) sew(p, q); }
+} else if (pc.sew === 'attach') {
+for (const [pg, bg] of pc.attach) { const p = pr.map[pg], q = body.map[bg]; if (p >= 0 && q >= 0) sew(p, q); else if (p >= 0) { const q2 = nearest(p, bodyAll, dog.H * 0.06); if (q2 >= 0) sew(p, q2); } }
+} else {
+for (const p of pr.row0) { const q = nearest(p, bodyAll, pc.sewR || dog.H * 0.08); if (q >= 0) sew(p, q); }
+}
+}
+const n = X.length / 3;
+for (let t = 0; t < rtris.length; t++) if (rtris[t] < 0) rtris[t] = n + (-1 - rtris[t]);
+return new Cloth(X, UV, tris, cons, pinned, { area, seams, pieces: pieces.length, gd, meta }, { extra, dups, rtris, rib, trim });
+}
+/* ================= XPBD cloth solver =================
+Position based dynamics with compliant distance constraints (stretch, shear, bending, seams),
+collision against the dog's signed distance field and the floor. No cloth self-collision. */
+class Cloth {
+constructor(X, UV, tris, cons, pinned, info, rd) {
+const n = X.length / 3;
+this.extra = new Float32Array(rd.extra);
+this.dups = rd.dups; const nr = n + rd.dups.length;
+this.rX = new Float32Array(nr * 3); this.rN = new Float32Array(nr * 3); this.rUV = new Float32Array(nr * 2);
+this.rUV.set(UV); rd.dups.forEach(([, u, v], k) => { this.rUV[(n + k) * 2] = u; this.rUV[(n + k) * 2 + 1] = v; });
+this.ridx = new Uint32Array(rd.rtris); this.rib = new Uint8Array(rd.rib);
+this.rTrim = new Float32Array(nr); for (let i = 0; i < n; i++) this.rTrim[i] = rd.trim[i]; rd.dups.forEach(([src], k) => { this.rTrim[n + k] = rd.trim[src]; });
+this.n = n; this.X = new Float32Array(X); this.X0 = new Float32Array(X); this.P = new Float32Array(X);
+this.UV = new Float32Array(UV); this.idx = new Uint32Array(tris); this.N = new Float32Array(n * 3);
+const m = cons.length / 3;
+this.m = m; this.ci = new Int32Array(m); this.cj = new Int32Array(m); this.ck = new Uint8Array(m);
+this.r0 = new Float32Array(m); this.rest = new Float32Array(m); this.alpha = new Float32Array(m);
+this.du = new Float32Array(m); this.dv = new Float32Array(m);
+for (let c = 0; c < m; c++) {
+const a = cons[c * 3], b = cons[c * 3 + 1], k = cons[c * 3 + 2];
+this.ci[c] = a; this.cj[c] = b; this.ck[c] = k;
+this.r0[c] = Math.hypot(X[b * 3] - X[a * 3], X[b * 3 + 1] - X[a * 3 + 1], X[b * 3 + 2] - X[a * 3 + 2]);
+this.du[c] = UV[b * 2] - UV[a * 2]; this.dv[c] = UV[b * 2 + 1] - UV[a * 2 + 1];
+}
+{ const L = []; for (let c = 0; c < m; c++) if (this.ck[c] <= 1) L.push(this.r0[c]); L.sort((a, b) => a - b); const med = L[L.length >> 1] || 0.01; this.spacing = med;
+for (let c = 0; c < m; c++) { const k = this.ck[c]; if (k === 4) continue; const mn = k === 3 ? med * 0.9 : k === 2 ? med * 0.5 : med * 0.35; if (this.r0[c] < mn) this.r0[c] = mn; } }
+this.A = new Float32Array(n);
+for (let t = 0; t < this.idx.length; t += 3) {
+const a = this.idx[t], b = this.idx[t + 1], c = this.idx[t + 2];
+const ux = X[b * 3] - X[a * 3], uy = X[b * 3 + 1] - X[a * 3 + 1], uz = X[b * 3 + 2] - X[a * 3 + 2];
+const vx = X[c * 3] - X[a * 3], vy = X[c * 3 + 1] - X[a * 3 + 1], vz = X[c * 3 + 2] - X[a * 3 + 2];
+const ar = Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 6;
+this.A[a] += ar; this.A[b] += ar; this.A[c] += ar;
+}
+this.W = new Float32Array(n); this.pins = new Set(pinned); this.fixed = new Set(pinned);
+this.info = info; this.grab = null; this.sub = 10; this.time = 0; this.maxGrabStep = 0.002; this.iters = 2;
+this.computeNormals();
+}
+setFabric(f, fit) {
+const dens = f.weight / 1000; this.dens = dens;
+for (let i = 0; i < this.n; i++) this.W[i] = this.pins.has(i) ? 0 : 1 / (dens * Math.max(this.A[i], 1e-7));
+this.fric = f.fric; this.thick = f.thick / 1000 + 0.0025; this.damp = 0.6 + f.fric * 0.6;
+for (let c = 0; c < this.m; c++) {
+const k = this.ck[c];
+this.alpha[c] = k === 0 || k === 1 ? f.stretch : k === 2 ? f.stretch * 4 : k === 3 ? f.bend : 2e-6;
+if (k === 4) { this.rest[c] = this.r0[c] < this.spacing * 0.5 ? 0 : this.r0[c]; continue; }
+const du = this.du[c], dv = this.dv[c], l2 = du * du + dv * dv;
+this.rest[c] = l2 > 1e-12 ? this.r0[c] * Math.sqrt((du * du + dv * dv * fit * fit) / l2) : this.r0[c];
+if (k === 1 && this.rib[this.ci[c]] && this.rib[this.cj[c]]) this.rest[c] *= 0.86; // ribbed hems and cuffs hug the body
+}
+}
+startGrab(i, p) { this.grab = { i, p }; this.grabNb = []; for (let c = 0; c < this.m; c++) if (this.ck[c] <= 2 && (this.ci[c] === i || this.cj[c] === i)) this.grabNb.push(c); this.released = false; }
+togglePin(i) { if (this.pins.has(i)) { if (this.fixed.has(i)) return false; this.pins.delete(i); this.W[i] = 1 / (this.dens * Math.max(this.A[i], 1e-7)); return false; } this.pins.add(i); this.W[i] = 0; return true; }
+clearPins() { for (const i of [...this.pins]) if (!this.fixed.has(i)) { this.pins.delete(i); this.W[i] = 1 / (this.dens * Math.max(this.A[i], 1e-7)); } }
+reset() { this.X.set(this.X0); this.P.set(this.X0); this.computeNormals(); }
+step(dt, G, wind) {
+const sub = this.sub, h = dt / sub, h2 = h * h, X = this.X, P = this.P, W = this.W, n = this.n;
+const damp = Math.max(0, 1 - this.damp * h), gy = -9.81 * h2, vmax2 = (this.spacing * 0.6) ** 2, pmax = this.spacing * 0.45; // pushes are spread over substeps so moving legs don't yank the fabric
+const wl = Math.hypot(1, 0.25), wx = -1 / wl, wz = 0.25 / wl;
+const wa = wind * 14 * Math.min(0.15 / this.dens, 3) * h2;
+const nrm = [0, 0, 0], ci = this.ci, cj = this.cj, ck = this.ck, rest = this.rest, alpha = this.alpha, m = this.m, N = this.N;
+const th = this.thick, fr = Math.max(this.fric, 0.55); // fabric grips fur: never slides like on glass
+this.time += dt;
+const tm = this.time;
+for (let s = 0; s < sub; s++) {
+for (let i = 0; i < n; i++) {
+if (W[i] === 0) continue;
+const k = i * 3; const x = X[k], y = X[k + 1], z = X[k + 2];
+let ax = 0, az = 0, ay = gy;
+if (wa > 0) {
+const f = Math.abs(N[k] * wx + N[k + 2] * wz) * (0.55 + 0.45 * Math.sin(tm * 5 + x * 17 + z * 11 + y * 7));
+ax = wx * wa * f; az = wz * wa * f; ay += wa * 0.15 * f;
+}
+let vx = (x - P[k]) * damp, vy = (y - P[k + 1]) * damp, vz = (z - P[k + 2]) * damp;
+const vl = vx * vx + vy * vy + vz * vz; if (vl > vmax2) { const f = Math.sqrt(vmax2 / vl); vx *= f; vy *= f; vz *= f; } // speed limit: no explosions
+X[k] = x + vx + ax; X[k + 1] = y + vy + ay; X[k + 2] = z + vz + az;
+P[k] = x; P[k + 1] = y; P[k + 2] = z;
+}
+if (this.grab) { // soft grab: move toward the cursor at a limited speed, never into the body
+const g = this.grab.i * 3, t = this.grab.p, mx = this.maxGrabStep;
+let dx = t[0] - X[g], dy = t[1] - X[g + 1], dz = t[2] - X[g + 2]; const l = Math.hypot(dx, dy, dz);
+if (l > mx) { dx *= mx / l; dy *= mx / l; dz *= mx / l; }
+X[g] += dx; X[g + 1] += dy; X[g + 2] += dz;
+const d = sampleGrid(G, X[g], X[g + 1], X[g + 2], nrm), want = th + this.extra[this.grab.i];
+if (d < want) { X[g] += nrm[0] * (want - d); X[g + 1] += nrm[1] * (want - d); X[g + 2] += nrm[2] * (want - d); }
+}
+for (let it = 0; it < this.iters; it++) for (let c = 0; c < m; c++) {
+if (it > 0 && ck[c] > 1 && ck[c] !== 4) continue; // extra passes only for stretch + seams
+const a = ci[c], b = cj[c], wa_ = W[a], wb = W[b], ws = wa_ + wb; if (ws === 0) continue;
+const ka = a * 3, kb = b * 3;
+const dx = X[kb] - X[ka], dy = X[kb + 1] - X[ka + 1], dz = X[kb + 2] - X[ka + 2];
+const len = Math.sqrt(dx * dx + dy * dy + dz * dz); if (len < 1e-9) continue;
+const C = len - rest[c]; const hard = ck[c] <= 1 && len > rest[c] * 1.12; // strain limit: fabric can't stretch past ~12 %
+const l = -C / (ws + (hard ? 0 : alpha[c] / h2)) / len;
+X[ka] -= dx * l * wa_; X[ka + 1] -= dy * l * wa_; X[ka + 2] -= dz * l * wa_;
+X[kb] += dx * l * wb; X[kb + 1] += dy * l * wb; X[kb + 2] += dz * l * wb;
+}
+if (this.grab && this.grabNb) {
+const g = this.grab.i; let worst = 0;
+for (const c of this.grabNb) { const a = ci[c] * 3, b = cj[c] * 3; const l = Math.hypot(X[b] - X[a], X[b + 1] - X[a + 1], X[b + 2] - X[a + 2]); worst = Math.max(worst, l / rest[c] - 1); }
+if (worst > 0.45) { this.grab = null; this.grabNb = null; this.released = true; this.W[g] = this.pins.has(g) ? 0 : 1 / (this.dens * Math.max(this.A[g], 1e-7)); }
+}
+for (let i = 0; i < n; i++) {
+if (W[i] === 0) continue;
+const k = i * 3;
+const thi = th + this.extra[i]; let d = sampleGrid(G, X[k], X[k + 1], X[k + 2], nrm);
+if (d < thi) {
+let pen = Math.min(thi - d, pmax); X[k] += nrm[0] * pen; X[k + 1] += nrm[1] * pen; X[k + 2] += nrm[2] * pen;
+const n2 = [0, 0, 0], d2 = sampleGrid(G, X[k], X[k + 1], X[k + 2], n2); // second pass for creases (armpits)
+if (d2 < thi && d >= -this.spacing) { const p2 = Math.min(thi - d2, pmax); X[k] += n2[0] * p2; X[k + 1] += n2[1] * p2; X[k + 2] += n2[2] * p2; }
+const mx = X[k] - P[k], my = X[k + 1] - P[k + 1], mz = X[k + 2] - P[k + 2];
+const dn = mx * nrm[0] + my * nrm[1] + mz * nrm[2];
+X[k] -= (mx - nrm[0] * dn) * fr; X[k + 1] -= (my - nrm[1] * dn) * fr; X[k + 2] -= (mz - nrm[2] * dn) * fr;
+}
+if (X[k + 1] < th) { X[k + 1] = th; X[k] -= (X[k] - P[k]) * 0.6; X[k + 2] -= (X[k + 2] - P[k + 2]) * 0.6; }
+}
+}
+this.computeNormals();
+}
+computeNormals() {
+const X = this.X, N = this.N, I = this.idx; N.fill(0);
+for (let t = 0; t < I.length; t += 3) {
+const a = I[t] * 3, b = I[t + 1] * 3, c = I[t + 2] * 3;
+const ux = X[b] - X[a], uy = X[b + 1] - X[a + 1], uz = X[b + 2] - X[a + 2], vx = X[c] - X[a], vy = X[c + 1] - X[a + 1], vz = X[c + 2] - X[a + 2];
+const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+N[a] += nx; N[a + 1] += ny; N[a + 2] += nz; N[b] += nx; N[b + 1] += ny; N[b + 2] += nz; N[c] += nx; N[c + 1] += ny; N[c + 2] += nz;
+}
+for (let i = 0; i < N.length; i += 3) { const l = Math.hypot(N[i], N[i + 1], N[i + 2]) || 1; N[i] /= l; N[i + 1] /= l; N[i + 2] /= l; }
+if (this.rX) { // fill render buffers (with seam duplicates)
+this.rX.set(X); this.rN.set(N); const n3 = this.n * 3;
+for (let k = 0; k < this.dups.length; k++) { const s = this.dups[k][0] * 3, d = n3 + k * 3; this.rX[d] = X[s]; this.rX[d + 1] = X[s + 1]; this.rX[d + 2] = X[s + 2]; this.rN[d] = N[s]; this.rN[d + 1] = N[s + 1]; this.rN[d + 2] = N[s + 2]; }
+}
+}
+stretchStats() { // average & max strain of stretch constraints
+let s = 0, mx = 0, c = 0; const X = this.X;
+for (let k = 0; k < this.m; k++) { if (this.ck[k] > 1) continue; const a = this.ci[k] * 3, b = this.cj[k] * 3; const l = Math.hypot(X[b] - X[a], X[b + 1] - X[a + 1], X[b + 2] - X[a + 2]); const e = l / (this.rest[k] || 1) - 1; s += Math.abs(e); mx = Math.max(mx, e); c++; }
+return { avg: s / (c || 1), max: mx };
+}
+}
+'use strict';
+const DOG_DEFAULT = { h: .55, len: .95, leg: .5, wid: .8, waist: .8, neck: 1, neckT: 1, neckA: 50, head: 1, snout: 1, muzzle: 1, ear: 'floppy', earS: 1, tail: 'down', tailL: .45, tailT: 1, legT: 1, fluff: 0, girth: 1 };
+const BREEDS = [
+['mestizo', 'Mestizo', {}],
+['canecorso', 'Cane Corso', { h: .66, len: .9, wid: .85, waist: .85, neckT: 1.25, head: 1.18, snout: .55, muzzle: 1.25, ear: 'semi', earS: .7, tailL: .4, legT: 1.2, girth: 1.08 }],
+['dachshund', 'Dachshund', { h: .23, len: 1.75, leg: .32, waist: .86, neck: 1.1, head: 1.0, snout: 1.15, muzzle: .85, earS: 1.25, tailL: .85, legT: 1.15 }],
+['golden', 'Golden Retriever', { h: .58, len: 1.0, wid: .78, waist: .82, snout: .95, tail: 'otter', tailL: .55, fluff: .02 }],
+['labrador', 'Labrador', { h: .57, len: .98, wid: .82, waist: .85, neckT: 1.1, head: 1.05, snout: .9, muzzle: 1.1, earS: .9, tail: 'otter', tailL: .5, legT: 1.1 }],
+['pastor', 'Pastor Alemán', { h: .62, len: 1.05, wid: .75, waist: .78, neck: 1.15, snout: 1.15, muzzle: .9, ear: 'erect', earS: 1.15, tail: 'saber', tailL: .6, fluff: .012 }],
+['frenchie', 'Bulldog Francés', { h: .30, len: .95, leg: .42, wid: .95, waist: .75, neck: .6, neckT: 1.3, head: 1.15, snout: .2, muzzle: 1.3, ear: 'bat', earS: 1.15, tail: 'stub', legT: 1.3, girth: 1.08 }],
+['chihuahua', 'Chihuahua', { h: .20, leg: .55, waist: .78, neck: .9, head: 1.4, snout: .45, muzzle: .8, ear: 'erect', earS: 1.45, tail: 'up', tailL: .55, legT: .9 }],
+['husky', 'Husky Siberiano', { h: .56, len: 1.0, leg: .52, wid: .78, waist: .82, snout: .95, ear: 'erect', earS: .9, tail: 'curl', tailL: .5, fluff: .025 }],
+['caniche', 'Caniche (Poodle)', { h: .55, len: .9, leg: .6, wid: .7, waist: .75, neck: 1.3, head: .9, snout: 1.25, muzzle: .75, earS: 1.1, tail: 'up', tailL: .35, fluff: .03, legT: .85 }],
+['pitbull', 'Pitbull', { h: .48, len: .95, leg: .52, wid: .9, waist: .78, neckT: 1.3, head: 1.22, snout: .7, muzzle: 1.25, ear: 'semi', earS: .75, legT: 1.22, girth: 1.08 }],
+['beagle', 'Beagle', { h: .38, len: 1.0, waist: .85, head: 1.05, snout: .9, earS: 1.2, tail: 'up', tailL: .5 }],
+['bulldog', 'Bulldog Inglés', { h: .38, len: .95, leg: .4, wid: 1.05, waist: .82, neck: .5, neckT: 1.5, head: 1.2, snout: .18, muzzle: 1.4, ear: 'semi', earS: .6, tail: 'stub', legT: 1.4, girth: 1.15 }],
+['galgo', 'Galgo', { h: .72, len: 1.0, leg: .6, wid: .6, waist: .5, neck: 1.4, neckT: .8, head: .85, snout: 1.35, muzzle: .7, ear: 'semi', earS: .7, tail: 'saber', tailL: .75, tailT: .7, legT: .8 }],
+['collie', 'Border Collie', { h: .53, len: 1.0, wid: .75, waist: .8, head: .95, ear: 'semi', earS: .9, tail: 'saber', tailL: .55, fluff: .02 }],
+['rottweiler', 'Rottweiler', { h: .63, len: .95, wid: .88, waist: .85, neckT: 1.3, head: 1.2, snout: .7, muzzle: 1.2, earS: .7, tail: 'stub', legT: 1.28, girth: 1.12 }],
+['doberman', 'Dóberman', { h: .68, len: .95, leg: .55, wid: .7, waist: .7, neck: 1.4, neckT: .95, head: .95, snout: 1.25, muzzle: .85, ear: 'erect', earS: 1.1, tail: 'stub' }],
+['shihtzu', 'Shih Tzu', { h: .25, len: 1.1, leg: .42, wid: .85, waist: .9, neck: .8, head: 1.3, snout: .3, muzzle: 1.1, earS: 1.3, tail: 'curl', tailL: .5, fluff: .06 }],
+['pomerania', 'Pomerania', { h: .2, len: .85, wid: .85, waist: .9, head: 1.2, snout: .45, ear: 'erect', earS: .8, tail: 'curl', tailL: .6, fluff: .12 }],
+['yorkshire', 'Yorkshire Terrier', { h: .2, len: .95, wid: .75, waist: .85, head: 1.15, snout: .65, ear: 'erect', earS: 1.0, tail: 'up', tailL: .4, fluff: .03 }],
+['boxer', 'Bóxer', { h: .6, len: .92, leg: .55, waist: .72, neckT: 1.15, head: 1.1, snout: .35, muzzle: 1.3, ear: 'semi', earS: .8, tail: 'stub', legT: 1.1 }],
+['grandanes', 'Gran Danés', { h: .8, len: .95, leg: .58, wid: .72, waist: .72, neck: 1.3, head: 1.15, snout: 1.15, muzzle: 1.05, earS: .8, tailL: .6, legT: 1.1 }],
+['pug', 'Pug (Carlino)', { h: .3, len: .9, leg: .45, wid: 1.0, waist: .85, neck: .5, neckT: 1.4, head: 1.18, snout: .15, muzzle: 1.2, ear: 'semi', earS: .6, tail: 'curl', tailL: .5, girth: 1.1 }],
+['corgi', 'Corgi', { h: .27, len: 1.5, leg: .34, wid: .85, waist: .85, head: 1.15, snout: .9, ear: 'erect', earS: 1.4, tail: 'stub', legT: 1.25, fluff: .02 }],
+['samoyedo', 'Samoyedo', { h: .55, len: .95, leg: .52, waist: .85, snout: .85, ear: 'erect', earS: .75, tail: 'curl', tailL: .55, fluff: .05 }],
+['shiba', 'Shiba Inu', { h: .38, len: .95, leg: .52, wid: .78, waist: .82, head: 1.05, snout: .8, ear: 'erect', earS: .85, tail: 'curl', tailL: .45, fluff: .02 }],
+['maltes', 'Maltés', { h: .22, len: 1.0, leg: .45, head: 1.2, snout: .55, earS: 1.2, tail: 'curl', tailL: .5, fluff: .06 }],
+['sanbernardo', 'San Bernardo', { h: .75, len: 1.0, wid: .9, waist: .9, neckT: 1.4, head: 1.32, snout: .65, muzzle: 1.35, earS: .9, tailL: .55, legT: 1.38, fluff: .02, girth: 1.12 }],
+['dalmata', 'Dálmata', { h: .58, len: .98, leg: .55, wid: .74, waist: .75, head: .95, snout: 1.05, earS: .9, tail: 'saber', tailL: .55 }],
+['schnauzer', 'Schnauzer', { h: .48, len: .9, leg: .55, wid: .75, waist: .82, head: 1.05, snout: 1.05, muzzle: 1.05, ear: 'semi', earS: .8, tail: 'up', tailL: .25, fluff: .015 }],
+['akita', 'Akita', { h: .66, len: .98, leg: .52, wid: .85, waist: .85, neckT: 1.2, head: 1.15, snout: .8, muzzle: 1.1, ear: 'erect', earS: .7, tail: 'curl', tailL: .5, fluff: .03, legT: 1.2 }],
+['bernes', 'Boyero de Berna', { h: .66, len: 1.0, wid: .85, waist: .88, neckT: 1.2, head: 1.1, snout: .85, muzzle: 1.1, earS: .85, tailL: .55, fluff: .035, legT: 1.25 }],
+['whippet', 'Whippet', { h: .48, len: .95, leg: .6, wid: .6, waist: .52, neck: 1.35, neckT: .8, head: .85, snout: 1.3, muzzle: .7, ear: 'semi', earS: .7, tail: 'saber', tailL: .7, tailT: .7, legT: .78 }],
+['basset', 'Basset Hound', { h: .36, len: 1.6, leg: .3, wid: .9, waist: .9, head: 1.15, snout: 1.2, muzzle: 1.1, earS: 1.6, tail: 'up', tailL: .55, legT: 1.4, girth: 1.1 }],
+['cocker', 'Cocker Spaniel', { h: .39, len: .95, waist: .85, head: 1.05, snout: .85, earS: 1.4, tail: 'stub', fluff: .03 }],
+['malinois', 'Pastor Belga Malinois', { h: .62, len: 1.0, leg: .53, wid: .72, waist: .75, neck: 1.2, snout: 1.15, muzzle: .9, ear: 'erect', earS: 1.1, tail: 'saber', tailL: .58 }]
+];
+const breedById = id => BREEDS.find(b => b[0] === id) || BREEDS[0];
+const breedParams = id => Object.assign({}, DOG_DEFAULT, breedById(id)[2]);
+const sizeClass = h => h < .26 ? 'Mini' : h < .4 ? 'Pequeño' : h < .6 ? 'Mediano' : h < .7 ? 'Grande' : 'Gigante';
+const SHAPE_CTL = [
+['h', 'Altura a la cruz', .15, .9, .005, v => (v * 100).toFixed(0) + ' cm'],
+['len', 'Largo del cuerpo', .6, 2, .01],
+['leg', 'Largo de patas', .28, .65, .01],
+['girth', 'Volumen del torso', .8, 1.3, .01],
+['wid', 'Ancho del pecho', .55, 1.1, .01],
+['waist', 'Cintura', .45, .95, .01],
+['neck', 'Largo de cuello', .4, 1.6, .01],
+['neckT', 'Grosor de cuello', .7, 1.6, .01],
+['head', 'Tamaño de cabeza', .7, 1.5, .01],
+['snout', 'Largo de hocico', .12, 1.5, .01],
+['muzzle', 'Ancho de hocico', .6, 1.5, .01],
+['earS', 'Tamaño de orejas', .5, 1.7, .01],
+['tailL', 'Largo de cola', .1, .9, .01],
+['legT', 'Grosor de patas', .7, 1.5, .01],
+['fluff', 'Pelaje (volumen)', 0, .14, .002]
+];
+'use strict';
+const PATTERNS = [
+[0, 'Liso'], [1, 'Rayas'], [2, 'Tartán'], [3, 'Vichy'], [4, 'Lunares'], [5, 'Camuflaje'], [6, 'Huellas'],
+[7, 'Chevron'], [8, 'Argyle'], [13, 'Pata de gallo'], [9, 'Flores'], [10, 'Corazones'], [11, 'Degradado']
+];
+const PALETTES = [
+['Nórdico invernal', ['#1f3a5f', '#e8eef3', '#c8102e'], 'Azul profundo con blanco y un toque rojo: clásico de suéter de punto.'],
+['Táctico', ['#2f3a2b', '#6b705c', '#e85d04'], 'Verdes oliva con naranja de seguridad para los detalles.'],
+['Marinero', ['#14213d', '#fdfdfd', '#e63946'], 'Rayas azul marino y blanco, rojo en ribetes.'],
+['Pastel algodón', ['#f7c6d9', '#c6e2f7', '#fff4b8'], 'Tonos de baja saturación, suaves para cachorros.'],
+['Otoño cálido', ['#8c4a2f', '#d9a441', '#f2e3c6'], 'Óxido, mostaza y crema: armonía análoga.'],
+['Neón deportivo', ['#111827', '#39ff14', '#00e5ff'], 'Base oscura que hace brillar los neones; visible de noche.'],
+['Lujo', ['#0b0b0b', '#c9a227', '#f5f0e6'], 'Negro, dorado y marfil. Usa poco dorado (regla 60-30-10).'],
+['Bosque', ['#1b4332', '#95d5b2', '#d8f3dc'], 'Monocromático en verdes: elegante y tranquilo.'],
+['Retro 70s', ['#e76f51', '#f4a261', '#2a9d8f'], 'Naranjas cálidos con un turquesa complementario.'],
+['Navidad', ['#b5121b', '#f8f9fa', '#0f5132'], 'Rojo y blanco dominan; el verde queda de acento (rojo y verde juntos casi no contrastan en valor).'],
+['Cielo de vidrio', ['#bfe3ff', '#3a86ff', '#ffffff'], 'La paleta del estudio: azules luminosos.'],
+['Lluvia segura', ['#ffd60a', '#1d3557', '#d9d9d9'], 'Amarillo de alta visibilidad con azul y gris reflectivo.'],
+['Terracota', ['#c65d3b', '#f1e4d1', '#3d405b'], 'Tierra cálida con un azul grisáceo de contraste.'],
+['Visión canina', ['#1d4ed8', '#facc15', '#f8fafc'], 'Azul y amarillo: los colores que los perros distinguen mejor.']
+];
+const KB = [
+{ id: 'fundamentos', title: 'Fundamentos del diseño', html: `
+<h2>Fundamentos del diseño gráfico</h2>
+<p>Todo diseño se construye con unos pocos <b>elementos</b> y se ordena con unos pocos <b>principios</b>. Si dominas estas dos listas puedes analizar cualquier prenda, logo o estampado.</p>
+<h3>Elementos</h3>
+<ul>
+<li><b>Punto</b>: la unidad mínima; un botón, un lunar o un remache funcionan como puntos visuales.</li>
+<li><b>Línea</b>: guía la mirada. Las costuras, ribetes y rayas son líneas. Horizontales calman, verticales estilizan, diagonales dan energía.</li>
+<li><b>Forma</b>: geométrica (círculos, triángulos) u orgánica (huellas, hojas). La silueta de la prenda es la forma más importante.</li>
+<li><b>Color</b>: tono, saturación y valor (claro/oscuro). Ver el capítulo de color.</li>
+<li><b>Valor</b>: cuán claro u oscuro es algo. El contraste de valor es lo que más se ve de lejos.</li>
+<li><b>Textura</b>: real (lana, polar, cuero) o visual (un estampado que imita tejido).</li>
+<li><b>Espacio</b>: positivo (lo ocupado) y negativo (lo vacío). El espacio negativo bien usado hace legible un logo.</li>
+</ul>
+<h3>Principios</h3>
+<ul>
+<li><b>Equilibrio</b>: simétrico (formal, estable) o asimétrico (dinámico). Una prenda de perro suele ser simétrica respecto al lomo.</li>
+<li><b>Contraste</b>: diferencia de color, valor, tamaño o textura. Sin contraste nada destaca.</li>
+<li><b>Énfasis / punto focal</b>: un solo elemento protagonista (el logo en el lomo, un cuello de otro color).</li>
+<li><b>Jerarquía</b>: qué se ve primero, segundo y tercero. Se controla con tamaño, color y posición.</li>
+<li><b>Ritmo y repetición</b>: los estampados son ritmo puro; la repetición crea unidad.</li>
+<li><b>Proporción y escala</b>: el tamaño de los elementos respecto al perro. Un lunar de 3 cm es enorme en un Chihuahua y diminuto en un Gran Danés.</li>
+<li><b>Unidad y variedad</b>: suficientes elementos en común para que sea un conjunto, suficiente variación para que no aburra.</li>
+<li><b>Movimiento</b>: cómo recorre la mirada la pieza. Las diagonales y degradados lo crean.</li>
+</ul>
+<h3>Gestalt (cómo percibimos)</h3>
+<ul>
+<li><b>Proximidad</b>: lo que está cerca se lee como grupo.</li>
+<li><b>Semejanza</b>: lo que se parece (color, forma) se agrupa.</li>
+<li><b>Cierre</b>: el ojo completa formas incompletas; útil en logos.</li>
+<li><b>Continuidad</b>: seguimos líneas y curvas suaves.</li>
+<li><b>Figura-fondo</b>: separamos lo que está delante de lo que está detrás; el contraste lo decide.</li>
+<li><b>Simetría y orden</b>: lo simétrico se percibe como una unidad estable.</li>
+</ul>` },
+{ id: 'color', title: 'Teoría del color', html: `
+<h2>Teoría del color</h2>
+<h3>Modelos de color</h3>
+<ul>
+<li><b>RGB</b>: luz (pantallas). Rojo, verde y azul suman blanco.</li>
+<li><b>CMYK</b>: tinta (impresión). Cian, magenta, amarillo y negro. Los colores de pantalla muy saturados pueden no existir en tinta.</li>
+<li><b>HSL / HSB</b>: tono, saturación y luminosidad; es la forma más intuitiva de razonar armonías.</li>
+<li><b>Pantone</b> y cartas textiles (TCX): códigos para que el taller tiña exactamente el color pedido.</li>
+</ul>
+<h3>Las tres dimensiones</h3>
+<p><b>Tono</b> (el color en sí), <b>saturación</b> (pureza) y <b>valor</b> (claro u oscuro). Para que algo destaque, cambia el valor; para que armonice, mantén cercano el tono o la saturación.</p>
+<h3>Armonías del círculo cromático</h3>
+<ul>
+<li><b>Monocromática</b>: un tono en varios valores. Elegante, nunca falla.</li>
+<li><b>Análoga</b>: tonos vecinos (naranja, ámbar, rojo). Natural y cálida.</li>
+<li><b>Complementaria</b>: opuestos (azul y naranja). Máximo contraste; usa uno como dominante.</li>
+<li><b>Complementaria dividida</b>: un color y los dos vecinos de su opuesto. Contraste con menos tensión.</li>
+<li><b>Triádica</b>: tres colores equidistantes. Alegre; baja la saturación de dos de ellos.</li>
+<li><b>Tetrádica</b>: dos pares complementarios. Rica pero difícil; deja uno como dominante.</li>
+</ul>
+<div class="demo"><i style="background:#1c6fd8"></i><i style="background:#d8801c"></i><i style="background:#1cd8c4"></i><i style="background:#d81c6f"></i></div>
+<h3>Regla 60-30-10</h3>
+<p>60 % color dominante (el cuerpo de la prenda), 30 % secundario (paneles, capucha), 10 % acento (ribetes, logo, cremallera). En el estudio corresponden a los espacios Principal, Secundario y Detalle.</p>
+<h3>Temperatura y psicología</h3>
+<ul>
+<li>Cálidos (rojo, naranja, amarillo): energía, juego, visibilidad.</li>
+<li>Fríos (azul, verde, violeta): calma, limpieza, confianza.</li>
+<li>Neutros (negro, gris, beige, blanco): base, elegancia; dejan hablar al estampado.</li>
+<li>Negro absorbe calor al sol; en climas cálidos prefiere colores claros.</li>
+</ul>
+<h3>Cómo ven los perros el color</h3>
+<p>Los perros tienen visión dicromática: distinguen bien azules y amarillos, mientras que rojos y verdes les parecen tonos parduzcos o grisáceos. Un juguete o detalle azul o amarillo es más visible <i>para el perro</i>; para las personas que lo miran, el contraste de valor sigue siendo lo que importa.</p>
+<h3>Contraste y accesibilidad</h3>
+<p>El estudio calcula la razón de contraste WCAG entre Principal y Secundario. Para texto o logos sobre tela busca al menos 4.5:1; para formas grandes, 3:1. Evita depender solo de rojo/verde: alrededor de 1 de cada 12 hombres tiene alguna forma de daltonismo.</p>` },
+{ id: 'tipografia', title: 'Tipografía', html: `
+<h2>Tipografía</h2>
+<h3>Familias</h3>
+<ul>
+<li><b>Serif</b> (con remates): clásica, editorial, de lujo.</li>
+<li><b>Sans serif</b> (palo seco): moderna, limpia, la más legible en tela.</li>
+<li><b>Slab serif</b> (remates gruesos): deportiva, universitaria, robusta.</li>
+<li><b>Script</b> (manuscrita): cercana, femenina o vintage; difícil a tamaño pequeño.</li>
+<li><b>Display</b>: hecha para titulares; personalidad fuerte, solo en tamaños grandes.</li>
+<li><b>Monoespaciada</b>: técnica, de código o máquina de escribir.</li>
+</ul>
+<h3>Conceptos</h3>
+<ul>
+<li><b>Peso</b>: fino, regular, negrita. En tela usa regular o más grueso.</li>
+<li><b>Interletrado (tracking)</b> y <b>kerning</b>: espacio entre letras; las mayúsculas cortas (MAX, LUNA) ganan con tracking amplio.</li>
+<li><b>Interlineado</b>: espacio entre líneas; alrededor de 1.2× el tamaño en titulares.</li>
+<li><b>Jerarquía</b>: no más de dos familias y tres tamaños por pieza.</li>
+<li><b>Combinaciones</b>: una display o serif para el nombre, una sans para información (talla, cuidado).</li>
+</ul>
+<h3>Texto sobre ropa de perro</h3>
+<ul>
+<li>Altura mínima de letra legible: unos 1.5 cm en perros pequeños, 3 cm en grandes, si debe leerse a 2 metros.</li>
+<li>Evita trazos de menos de 1 mm: se pierden en bordado, vinilo y punto.</li>
+<li>El lomo es la zona más visible y la que menos se deforma; los costados se estiran al caminar.</li>
+<li>Nombres cortos (hasta 8 letras) funcionan mejor en el lomo.</li>
+</ul>` },
+{ id: 'composicion', title: 'Composición y colocación', html: `
+<h2>Composición y colocación en la prenda</h2>
+<ul>
+<li><b>Retícula</b>: divide el espacio en columnas y filas para alinear elementos.</li>
+<li><b>Regla de tercios</b>: los puntos focales funcionan en las intersecciones de una cuadrícula 3×3.</li>
+<li><b>Proporción áurea</b> (1:1.618): proporciones agradables para paneles y franjas.</li>
+<li><b>Márgenes de seguridad</b>: deja al menos 2 cm entre un logo y una costura.</li>
+</ul>
+<h3>Zonas de una prenda canina</h3>
+<table><tr><th>Zona</th><th>Visibilidad</th><th>Deformación</th><th>Uso</th></tr>
+<tr><td>Lomo centro</td><td>Muy alta</td><td>Baja</td><td>Logo, nombre, estampado principal</td></tr>
+<tr><td>Cuello / collar</td><td>Alta</td><td>Media</td><td>Color de acento, ribete</td></tr>
+<tr><td>Costados</td><td>Media</td><td>Alta</td><td>Franjas, reflectivos</td></tr>
+<tr><td>Pecho y vientre</td><td>Baja</td><td>Alta</td><td>Tela técnica, cierre</td></tr>
+<tr><td>Mangas</td><td>Media</td><td>Muy alta</td><td>Puños, detalles pequeños</td></tr></table>
+<p>En el estudio, la posición del logo se mide en centímetros sobre el patrón plano: el eje <b>a lo largo</b> va de la cola al cuello y el eje <b>alrededor</b> va del lomo (0) hacia los costados.</p>` },
+{ id: 'archivos', title: 'Imágenes y archivos', html: `
+<h2>Imágenes y archivos</h2>
+<h3>Vector o ráster</h3>
+<ul>
+<li><b>Vector</b> (SVG, AI, EPS, PDF): formas matemáticas, escalan sin perder calidad. Ideal para logos, vinilo y bordado.</li>
+<li><b>Ráster</b> (PNG, JPG, WEBP): píxeles. Ideal para fotos y estampados con textura.</li>
+</ul>
+<h3>Formatos</h3>
+<table><tr><th>Formato</th><th>Transparencia</th><th>Uso</th></tr>
+<tr><td>PNG</td><td>Sí</td><td>Logos ráster, estampados con bordes nítidos</td></tr>
+<tr><td>JPG</td><td>No</td><td>Fotos; comprime con pérdida</td></tr>
+<tr><td>WEBP</td><td>Sí</td><td>Web, archivos ligeros</td></tr>
+<tr><td>SVG</td><td>Sí</td><td>Vectores para web y corte</td></tr>
+<tr><td>PDF</td><td>Sí</td><td>Patrones a escala real y archivos para imprenta</td></tr></table>
+<h3>Resolución</h3>
+<p>Para estampar, prepara el archivo a tamaño real y 300 ppp (puntos por pulgada). Un logo de 10 cm necesita unos 1200 px de ancho. Para sublimación de tela completa, 150 ppp suelen bastar.</p>
+<h3>Color para producción</h3>
+<p>Diseña en RGB pero revisa en CMYK si vas a imprimir. Para tintes de tela, entrega códigos Pantone TCX. Añade 3 a 5 mm de sangrado en los estampados que llegan al borde.</p>` },
+{ id: 'patrones', title: 'Patrones y estampados', html: `
+<h2>Patrones y estampados</h2>
+<h3>Tipos de repetición (rapport)</h3>
+<ul>
+<li><b>Bloque</b>: la misma tesela en cuadrícula. Simple, se nota la retícula.</li>
+<li><b>Media gota</b>: cada columna baja media tesela. Esconde la repetición.</li>
+<li><b>Medio ladrillo</b>: cada fila se desplaza media tesela (los lunares del estudio la usan).</li>
+<li><b>Espejo</b>: la tesela se refleja; crea simetrías tipo caleidoscopio.</li>
+</ul>
+<h3>Clásicos y su carácter</h3>
+<ul>
+<li><b>Rayas</b>: marineras (bretonas), deportivas, de diplomático. Horizontales ensanchan visualmente.</li>
+<li><b>Tartán</b>: cuadros escoceses de franjas cruzadas en sarga; invierno, tradición.</li>
+<li><b>Vichy (gingham)</b>: cuadros de dos colores con tono intermedio donde se cruzan; picnic, verano.</li>
+<li><b>Pata de gallo</b>: nace de una sarga 4/4 con hilos claros y oscuros; elegante.</li>
+<li><b>Argyle</b>: rombos con líneas diagonales; preppy, golf.</li>
+<li><b>Chevron / espiga</b>: zigzag; dinamismo.</li>
+<li><b>Lunares</b>: juego, retro. El tamaño cambia todo el carácter.</li>
+<li><b>Camuflaje</b>: manchas orgánicas en 3-4 colores; táctico, urbano.</li>
+<li><b>Cachemira (paisley)</b>: gota curva ornamental; bandanas.</li>
+<li><b>Florales y animal print</b>: personalidad fuerte; úsalos con colores lisos alrededor.</li>
+</ul>
+<h3>Escala según el perro</h3>
+<p>Como guía, que quepan al menos 4 repeticiones a lo ancho del lomo. Patrones grandes en perros pequeños se ven como manchas sueltas; patrones diminutos en perros grandes se ven como color plano a distancia.</p>` },
+{ id: 'tecnicas', title: 'Técnicas de estampado', html: `
+<h2>Técnicas de estampado y decoración</h2>
+<table><tr><th>Técnica</th><th>Ideal para</th><th>Ventajas</th><th>Cuidados</th></tr>
+<tr><td>Serigrafía</td><td>Lotes grandes, pocos colores</td><td>Duradera, colores sólidos</td><td>Un marco por color</td></tr>
+<tr><td>Sublimación</td><td>Poliéster blanco o claro</td><td>Estampado total, no se siente</td><td>No funciona en algodón ni en telas oscuras</td></tr>
+<tr><td>DTF</td><td>Cualquier tela, tiradas cortas</td><td>Muchos colores, detalle fino</td><td>Capa algo rígida</td></tr>
+<tr><td>DTG</td><td>Algodón</td><td>Fotos a todo color</td><td>Menos durable en lavados</td></tr>
+<tr><td>Vinilo textil (HTV)</td><td>Nombres, números</td><td>Barato, reflectivo disponible</td><td>Trazos mínimos ~1 mm</td></tr>
+<tr><td>Bordado</td><td>Logos pequeños</td><td>Premium, muy duradero</td><td>Evita detalles menores a 1 mm; poco flexible</td></tr>
+<tr><td>Parches</td><td>Personalización</td><td>Intercambiables con velcro</td><td>Agregan peso</td></tr></table>
+<p>Para visibilidad nocturna usa cinta o vinilo retrorreflectivo (refleja la luz de vuelta hacia su fuente, como los faros de un coche).</p>` },
+{ id: 'telas', title: 'Telas y materiales', html: `
+<h2>Telas y materiales</h2>
+<p><b>Gramaje</b> (g/m²): peso de la tela. Menos de 150 es ligera, 150-300 media, más de 300 pesada. <b>Tejido plano</b> (hilos cruzados, poco elástico) frente a <b>punto</b> (bucles, elástico). Corta siempre siguiendo el <b>hilo recto</b>: el sentido de la tela que no estira.</p>
+<table><tr><th>Tela</th><th>Para qué</th><th>Notas</th></tr>
+<tr><td>Algodón</td><td>Camisetas, bandanas</td><td>Transpira; encoge 3-5 %: prelava.</td></tr>
+<tr><td>Poliéster</td><td>Deportiva, sublimación</td><td>Seca rápido, no transpira tanto.</td></tr>
+<tr><td>Nylon / cordura</td><td>Chalecos, arneses</td><td>Resiste roces y desgarros.</td></tr>
+<tr><td>Mezclilla</td><td>Chaquetas</td><td>Rígida; elige con 1-2 % de elastano.</td></tr>
+<tr><td>Lana merino</td><td>Abrigos, suéteres</td><td>Abriga aun húmeda; lavar en frío.</td></tr>
+<tr><td>Polar</td><td>Sudaderas, forros</td><td>Cálido, no se deshilacha (bordes sin rematar).</td></tr>
+<tr><td>Punto</td><td>Suéteres</td><td>Elástico; usa máquina de remallado.</td></tr>
+<tr><td>Malla</td><td>Clima cálido, forros</td><td>Ventila mucho.</td></tr>
+<tr><td>Cuero sintético</td><td>Detalles, cuellos</td><td>Rígido; no para toda la prenda.</td></tr>
+<tr><td>Impermeable (PU/TPU)</td><td>Impermeables</td><td>No transpira: forra con malla o polar.</td></tr>
+<tr><td>Elastano</td><td>Trajes ceñidos</td><td>Se mezcla al 5-20 %; da movilidad.</td></tr>
+<tr><td>Satén</td><td>Capas, disfraces</td><td>Cae fluido; se deshilacha, remata bordes.</td></tr></table>
+<p>En el estudio, cada tela tiene parámetros físicos: <b>elasticidad</b> (cuánto estira), <b>rigidez al doblar</b>, <b>peso</b>, <b>fricción</b> y <b>grosor</b>. Cámbialos y verás cómo cambia la caída.</p>` },
+{ id: 'construccion', title: 'Patronaje y confección', html: `
+<h2>Patronaje y confección para perros</h2>
+<h3>Piezas típicas</h3>
+<ul><li><b>Espalda</b> (lomo): la pieza principal.</li><li><b>Panel de vientre / pecho</b>: más corto en machos para dejar libre la zona genital.</li><li><b>Cuello o capucha</b>.</li><li><b>Mangas</b> (opcionales): solo en las patas delanteras en la mayoría de modelos.</li></ul>
+<h3>Holguras recomendadas</h3>
+<table><tr><th>Medida</th><th>Prenda ceñida</th><th>Prenda normal</th><th>Abrigo</th></tr>
+<tr><td>Pecho</td><td>+1 a 2 cm</td><td>+3 a 5 cm</td><td>+5 a 8 cm</td></tr>
+<tr><td>Cuello</td><td>+1 cm</td><td>+2 cm</td><td>+3 cm</td></tr>
+<tr><td>Espalda</td><td>−2 cm</td><td>−1 cm</td><td>±0</td></tr></table>
+<p>La espalda suele terminar antes de la base de la cola para no ensuciarse.</p>
+<h3>Costuras y acabados</h3>
+<ul>
+<li>Margen de costura estándar: 1 cm (0.6 cm en punto con remalladora).</li>
+<li><b>Recta</b> para tejido plano; <b>overlock</b> para punto; <b>recubridora</b> (flatlock) para que no roce la piel.</li>
+<li>Rematar bordes con <b>bies</b> o dobladillo.</li>
+</ul>
+<h3>Cierres</h3>
+<ul><li><b>Velcro</b>: fácil y ajustable; atrapa pelo.</li><li><b>Broches</b> de presión: limpios; revisa que no se suelten.</li><li><b>Cremallera</b>: protege con una tapeta para no pellizcar el pelo.</li><li>Evita botones pequeños: riesgo de ingestión.</li></ul>
+<h3>Graduación de tallas</h3>
+<p>Graduar es escalar un patrón base a otras tallas. En perros no basta escalar todo igual: un Bulldog y un Galgo con la misma espalda tienen pechos muy distintos. Por eso el estudio usa perfiles con cuello, pecho y espalda por separado.</p>` },
+{ id: 'medidas', title: 'Medidas y tallas', html: `
+<h2>Cómo medir y elegir talla</h2>
+<ol>
+<li><b>Cuello</b>: donde iría el collar, dejando dos dedos de holgura.</li>
+<li><b>Pecho</b>: la parte más ancha, justo detrás de las patas delanteras.</li>
+<li><b>Espalda</b>: desde la base del cuello (la cruz) hasta la base de la cola.</li>
+<li><b>Cintura</b>: delante de las patas traseras.</li>
+</ol>
+<p>Mide con el perro de pie y una cinta flexible. El peso no sirve para elegir talla.</p>
+<table><tr><th>Talla</th><th>Espalda aprox.</th></tr>
+<tr><td>XXS</td><td>menos de 22 cm</td></tr><tr><td>XS</td><td>22-27 cm</td></tr><tr><td>S</td><td>27-33 cm</td></tr><tr><td>M</td><td>33-40 cm</td></tr><tr><td>L</td><td>40-50 cm</td></tr><tr><td>XL</td><td>50-60 cm</td></tr><tr><td>XXL</td><td>60-72 cm</td></tr></table>
+<p>Cada marca usa su propia tabla; esta es una referencia general.</p>
+<h3>Razas que necesitan patrón especial</h3>
+<ul>
+<li><b>Galgo, Whippet</b>: pecho muy profundo y cintura estrecha.</li>
+<li><b>Bulldog, Pug, Bulldog Francés</b>: pecho ancho y espalda corta.</li>
+<li><b>Dachshund, Corgi, Basset</b>: espalda larga, patas cortas, poco espacio bajo el vientre.</li>
+<li><b>Razas de pelo denso</b> (Husky, Samoyedo): mide sobre el pelo y deja más holgura.</li>
+</ul>
+<p>Las medidas que calcula el estudio salen del modelo 3D. Son una buena aproximación de diseño, pero para fabricar mide siempre al perro real.</p>` },
+{ id: 'bienestar', title: 'Bienestar y seguridad', html: `
+<h2>Bienestar y seguridad</h2>
+<ul>
+<li>La ropa es para frío, lluvia, protección solar o visibilidad; muchas razas de doble capa no necesitan abrigo.</li>
+<li>Las razas braquicéfalas (Pug, Bulldog) se sobrecalientan con facilidad: telas ligeras y cuellos holgados.</li>
+<li>Nunca cubras ojos, nariz ni orejas por completo; la capucha debe quedar suelta.</li>
+<li>Comprueba que pueda caminar, sentarse y orinar con la prenda puesta.</li>
+<li>Evita cordones, borlas y piezas pequeñas que pueda morder o tragar.</li>
+<li>Capas y disfraces: solo con supervisión, porque pueden engancharse.</li>
+<li>Agrega reflectivos para paseos nocturnos.</li>
+<li>Acostumbra al perro poco a poco y con premios.</li>
+</ul>` },
+{ id: 'marca', title: 'Marca y colección', html: `
+<h2>Marca y colección</h2>
+<ul>
+<li><b>Moodboard</b>: reúne imágenes, colores y texturas antes de diseñar.</li>
+<li><b>Colección cápsula</b>: 4 a 8 piezas que comparten paleta y estampados.</li>
+<li><b>Ficha técnica</b> (tech pack): dibujo plano, medidas por talla, telas, colores Pantone, costuras, etiquetas y colocación de logos.</li>
+<li><b>Etiquetas</b>: composición, cuidados, talla y marca. Colócalas donde no rocen.</li>
+<li><b>Fotos de producto</b>: fondo limpio, luz suave, vista lateral, 3/4 y trasera. El modo 360° del estudio sirve para presentaciones.</li>
+<li><b>Consistencia</b>: mismo logo, misma tipografía y misma paleta en toda la colección.</li>
+</ul>` },
+{ id: 'estudio', title: 'Cómo usar el estudio', html: `
+<h2>Cómo usar Dog Fashion Studio</h2>
+<ol>
+<li>Elige una <b>raza</b> o ajusta la forma con los controles. También puedes escribir las medidas reales de tu perro en Medidas.</li>
+<li>Elige una <b>prenda</b>. La tela cae sobre el modelo con física real.</li>
+<li>Elige la <b>tela</b> y ajusta sus propiedades físicas.</li>
+<li>Pinta con <b>Color</b> y <b>Diseño</b>: armonías, paletas, patrones, imagen propia, logo o texto y franja reflectiva.</li>
+<li>Personaliza en Prendas: <b>cuello</b> (alto, solapa de abrigo o piel sintética), <b>capucha</b>, <b>capa encima</b> y <b>puños y bordes</b> en color Detalle. En Diseño eliges la <b>textura de la tela</b> (acolchado, pana, tweed, punto, mezclilla…).</li>
+<li>Arrastra la tela con el ratón para acomodarla; si jalas demasiado, el estudio la suelta para que no se rompa. Doble clic pone o quita un <b>alfiler</b>.</li>
+<li>Prueba <b>Caminar</b> o <b>Trotar</b> y el <b>viento</b> para ver cómo se mueve.</li>
+</ol>
+<h3>Qué es real en la simulación</h3>
+<p>La tela usa dinámica basada en posiciones (XPBD): cada partícula tiene masa según el gramaje y está unida a sus vecinas por restricciones de estiramiento, cizalla y flexión, con costuras entre piezas (las mangas nacen del borde de la sisa). La tela no puede estirarse más de ~12 %, los bordes de punto se ajustan como un resorte, y choca con el cuerpo del perro mediante un campo de distancias y con el suelo, con fricción.</p>
+<h3>Límites actuales</h3>
+<ul>
+<li>La tela no choca consigo misma: las capas (capucha, cuellos, capa) se mantienen separadas con un grosor de capa, pero en pliegues muy apretados puede atravesarse.</li>
+<li>Las piezas se generan a partir del cuerpo; aún no hay editor 2D de patrones ni exportación DXF/PDF (fase 2).</li>
+<li>Las medidas son del modelo 3D, no del perro real.</li>
+<li>Los proyectos se guardan en este navegador.</li>
+</ul>
+<p><small>Dog Fashion Studio Beta · © 2026 ysbr27. Todos los derechos reservados.</small></p>` }
+];
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function relLum(h) { const c = hexToRgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+function contrastRatio(a, b) { const l1 = relLum(a), l2 = relLum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); }
+function hexToHsl(h) { let [r, g, b] = hexToRgb(h).map(v => v / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let hh = 0, s = 0; const l = (mx + mn) / 2; if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); hh = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh *= 60; } return [hh, s, l]; }
+function hslToHex(h, s, l) { h = ((h % 360) + 360) % 360; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l); const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join(''); }
+function studioTips(S, meas) {
+const t = [], b = S.breedId, gk = S.garment, f = S.fabric, H = S.dog.h;
+if (!GARMENTS[gk]) return [['', 'Elige una prenda en la pestaña Prendas para empezar a diseñar.']];
+const cr = contrastRatio(S.colors[0], S.colors[1]);
+if (S.pattern !== 0 && S.pattern !== 11 && S.pattern !== 12 && cr < 1.4) t.push(['w', 'Principal y Secundario casi no contrastan (' + cr.toFixed(1) + ':1); el patrón se perderá. Separa más sus valores claro/oscuro.']);
+if (S.decal.on && S.decal.kind === 'text') { const c = contrastRatio(S.decal.color, S.colors[0]); if (c < 3) t.push(['w', 'El texto tiene poco contraste con la tela (' + c.toFixed(1) + ':1). Para leerse bien busca 4.5:1.']); }
+if (['pug', 'bulldog', 'frenchie', 'shihtzu', 'boxer'].includes(b) && ['sueter', 'hoodie', 'abrigo'].includes(gk)) t.push(['w', 'Raza braquicéfala: se sobrecalienta fácil. Deja el cuello holgado y usa telas transpirables.']);
+if (['husky', 'samoyedo', 'akita', 'pomerania', 'bernes'].includes(b) && ['abrigo', 'sueter'].includes(gk)) t.push(['', 'Esta raza tiene doble capa de pelo y rara vez necesita abrigo; un impermeable ligero o un chaleco reflectivo le sirve más.']);
+if (['galgo', 'whippet'].includes(b)) t.push(['', 'Pecho muy profundo y cintura estrecha: alarga el panel de pecho y recorta el del vientre para que no se suba.']);
+if (['dachshund', 'corgi', 'basset'].includes(b)) t.push(['', 'Espalda larga y poco espacio bajo el vientre: cuida que la prenda no roce el suelo.']);
+if (gk === 'impermeable' && f.weight > 300) t.push(['w', 'Esta tela es pesada para un impermeable; prueba TPU o nylon.']);
+if (gk === 'impermeable' && S.fabricId === 'lana') t.push(['w', 'La lana absorbe agua; para lluvia usa una tela impermeable por fuera.']);
+if (H < 0.3 && f.weight > 300) t.push(['', 'Para un perro pequeño, una tela de más de 300 g/m² le pesa. Busca menos de 250 g/m².']);
+if (gk === 'capa') t.push(['', 'Las capas se enganchan con facilidad: úsala solo bajo supervisión.']);
+if ((gk === 'impermeable' || gk === 'chaleco') && !S.refl.on) t.push(['', 'Agrega una franja reflectiva (Diseño → Detalles) para paseos de noche.']);
+if (S.pattern !== 0 && S.patScale > 1.7 && H < 0.3) t.push(['', 'El patrón es grande para este tamaño de perro; prueba una escala menor para ver al menos 4 repeticiones a lo ancho.']);
+const sats = S.colors.map(c => hexToHsl(c)[1]);
+if (sats.filter(s => s > 0.75).length === 3) t.push(['', 'Tres colores muy saturados compiten entre sí. Aplica 60-30-10: baja la saturación del dominante.']);
+if (S.g.hood !== 'off' && S.g.hood !== false && GARMENTS[gk].hood && ['pastor', 'chihuahua', 'doberman', 'malinois', 'corgi', 'husky', 'frenchie'].includes(b)) t.push(['', 'Orejas erguidas: si la capucha se usa puesta, necesita aberturas para las orejas.']);
+if (t.length === 0) t.push(['', 'Todo se ve bien. Prueba Caminar para revisar cómo se mueve la prenda.']);
+return t.slice(0, 3);
+}
+'use strict';
+const GLSL_COMMON = `#version 300 es
+precision highp float;
+precision highp sampler2DShadow;
+uniform vec3 uCam; uniform vec3 uLight;
+uniform sampler2DShadow uShadow; uniform float uBias;
+vec3 env(vec3 d){
+float y=d.y;
+vec3 top=vec3(0.62,0.78,0.98), hor=vec3(0.92,0.96,1.0), gnd=vec3(0.66,0.76,0.88);
+vec3 c = y>0.0 ? mix(hor, top, pow(clamp(y,0.,1.),0.55)) : mix(hor, gnd, pow(clamp(-y,0.,1.),0.45));
+c += vec3(2.8,2.75,2.6)*smoothstep(0.955,0.988,dot(d,normalize(vec3(0.45,0.78,0.45))));
+c += vec3(1.2,1.4,1.75)*smoothstep(0.92,0.965,dot(d,normalize(vec3(-0.75,0.4,-0.5))));
+c += vec3(0.9)*smoothstep(0.86,0.95,dot(d,normalize(vec3(-0.15,0.95,0.05))));
+c += vec3(0.55,0.7,0.95)*smoothstep(0.07,0.0,abs(y-0.04))*0.7;
+return c;
+}
+float hash(vec3 p){ p=fract(p*0.3183099+.1); p*=17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+float noise(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.-2.*f);
+return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z); }
+float fbm(vec3 p){ float a=.5,s=0.; for(int i=0;i<4;i++){ s+=a*noise(p); p=p*2.03+vec3(1.7,9.2,3.1); a*=.5;} return s; }
+float worley(vec3 p){ vec3 i=floor(p), f=fract(p); float m=9.;
+for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++){ vec3 g=vec3(x,y,z); vec3 o=vec3(hash(i+g),hash(i+g+19.1),hash(i+g+47.3)); m=min(m,length(g+o-f)); } return m; }
+float shadowAt(vec4 s){
+vec3 p=s.xyz/s.w*0.5+0.5;
+if(p.x<0.||p.x>1.||p.y<0.||p.y>1.||p.z>1.) return 1.;
+vec2 ts=1./vec2(textureSize(uShadow,0)); float sum=0.;
+for(int x=-2;x<=2;x++)for(int y=-2;y<=2;y++) sum+=texture(uShadow, vec3(p.xy+vec2(x,y)*ts*1.2, p.z-uBias));
+return sum/25.;
+}
+vec3 tonemap(vec3 x){ x*=0.92; x=(x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14); return pow(clamp(x,0.,1.),vec3(1./2.2)); }
+`;
+const GLSL_PATTERN = `
+uniform vec3 uC1,uC2,uC3; uniform int uPat; uniform sampler2D uImg; uniform float uLen;
+float band(float x,float a,float b){ float f=fract(x); float w=max(fwidth(x),1e-4); return clamp((f-a)/w+0.5,0.,1.)*clamp((b-f)/w+0.5,0.,1.); }
+float disc(vec2 p,float r){ float d=length(p); float w=max(fwidth(d),1e-4); return 1.-smoothstep(r-w,r+w,d); }
+float ell(vec2 p,vec2 r){ return disc(p/r,1.); }
+float dot2(vec2 v){return dot(v,v);}
+float sdHeart(vec2 p){ p.x=abs(p.x); if(p.y+p.x>1.0) return sqrt(dot2(p-vec2(0.25,0.75)))-sqrt(2.0)/4.0;
+return sqrt(min(dot2(p-vec2(0.00,1.00)),dot2(p-0.5*max(p.x+p.y,0.0))))*sign(p.x-p.y); }
+vec2 rot2(vec2 p,float a){ float c=cos(a),s=sin(a); return vec2(c*p.x-s*p.y,s*p.x+c*p.y); }
+vec3 pattern(vec2 uv, float u01){
+if(uPat==0) return uC1;
+if(uPat==1){ vec3 c=mix(uC1,uC2,band(uv.x,.5,1.)); return mix(c,uC3,band(uv.x,.0,.07)); }
+if(uPat==2){ // tartan
+float bx=band(uv.x,0.,.32)+band(uv.x,.62,.78), by=band(uv.y,0.,.32)+band(uv.y,.62,.78);
+float lx=band(uv.x,.46,.5), ly=band(uv.y,.46,.5);
+vec3 cx=mix(mix(uC1,uC2,clamp(bx,0.,1.)),uC3,lx), cy=mix(mix(uC1,uC2,clamp(by,0.,1.)),uC3,ly);
+float tw=band((uv.x+uv.y)*14.,0.,.5);
+return mix(cx,cy,0.5+0.3*(tw*2.-1.)); }
+if(uPat==3){ float bx=band(uv.x,0.,.5), by=band(uv.y,0.,.5); return mix(uC1, uC2, (bx+by)*0.5); }
+if(uPat==4){ vec2 g=uv*1.5; g.x+=0.5*mod(floor(g.y),2.); vec2 c=fract(g)-.5; float r=disc(c,.2); return mix(uC1,uC2,r); }
+if(uPat==5){ vec3 p=vec3(uv*1.1,0.); float n1=fbm(p+3.), n2=fbm(p*1.3+11.), n3=fbm(p*0.9+27.);
+vec3 c=uC1; c=mix(c,uC2,smoothstep(.5,.53,n1)); c=mix(c,uC3,smoothstep(.55,.58,n2)); c=mix(c,uC1*0.62,smoothstep(.6,.63,n3)); return c; }
+if(uPat==6){ vec2 g=uv*1.25; vec2 id=floor(g); vec2 c=fract(g)-.5; c+= (vec2(hash(vec3(id,1.)),hash(vec3(id,2.)))-.5)*.15;
+c=rot2(c,(hash(vec3(id,3.))-.5)*1.6); float m=ell(c-vec2(0.,-.08),vec2(.15,.12));
+m=max(m,disc(c-vec2(-.15,.1),.065)); m=max(m,disc(c-vec2(-.055,.19),.065)); m=max(m,disc(c-vec2(.055,.19),.065)); m=max(m,disc(c-vec2(.15,.1),.065));
+return mix(uC1,mix(uC2,uC3,step(.5,hash(vec3(id,5.)))),m); }
+if(uPat==7){ float y=uv.y+abs(fract(uv.x)-.5)*1.2; vec3 c=mix(uC1,uC2,band(y,0.,.5)); return mix(c,uC3,band(y,.5,.58)); }
+if(uPat==8){ vec2 q=uv*vec2(1.,.75); float a=q.x+q.y, b=q.x-q.y; float ch=mod(floor(a)+floor(b),2.);
+vec3 c=mix(uC1,uC2,ch); float ln=max(band(a,.48,.52)*band(b*3.,0.,.6), band(b,.48,.52)*band(a*3.,0.,.6)); return mix(c,uC3,ln); }
+if(uPat==9){ vec2 g=uv*1.2; g.x+=0.5*mod(floor(g.y),2.); vec2 id=floor(g); vec2 c=fract(g)-.5; c=rot2(c,hash(vec3(id,7.))*6.28);
+float r=length(c), a=atan(c.y,c.x); float pr=.27*(.55+.45*abs(cos(a*2.5))); float w=fwidth(r)+1e-4;
+float pet=1.-smoothstep(pr-w,pr+w,r); vec3 col=mix(uC1,uC2,pet); return mix(col,uC3,disc(c,.075)); }
+if(uPat==10){ vec2 g=uv*1.3; g.x+=0.5*mod(floor(g.y),2.); vec2 id=floor(g); vec2 c=(fract(g)-vec2(.5,.38))*2.4; float d=sdHeart(c);
+float w=fwidth(d)+1e-4; float m=1.-smoothstep(-w,w,d); return mix(uC1,mix(uC2,uC3,mod(id.x+id.y,2.)),m); }
+if(uPat==11){ return mix(uC1,uC2,smoothstep(0.,1.,u01)); }
+if(uPat==12){ vec4 t=texture(uImg,fract(uv)); return mix(uC1,t.rgb,t.a); }
+if(uPat==13){ // houndstooth = 4/4 twill with 4 dark + 4 light threads in warp and weft
+vec2 g=floor(fract(uv)*8.); float warpTop=step(mod(g.x+g.y,8.),3.5);
+float d=mix(step(mod(g.y,8.),3.5), step(mod(g.x,8.),3.5), warpTop); return mix(uC1,uC2,d); }
+return uC1;
+}
+`;
+const VS_MESH = `#version 300 es
+in vec3 aPos; in vec3 aNrm; in vec2 aUV; in float aTrim;
+uniform mat4 uVP; uniform mat4 uSVP;
+out vec3 vP; out vec3 vN; out vec2 vUV; out vec4 vS; out float vTrim;
+void main(){ vP=aPos; vN=aNrm; vUV=aUV; vTrim=aTrim; vS=uSVP*vec4(aPos,1.); gl_Position=uVP*vec4(aPos,1.); }`;
+const FS_DOG = GLSL_COMMON + `
+in vec3 vP; in vec3 vN; in vec2 vUV; in vec4 vS; out vec4 o;
+uniform vec3 uBase, uBase2; uniform int uMat, uTex; uniform float uOpacity, uScale; uniform vec3 uSad; uniform int uBack;
+vec3 dogTex(vec3 p, vec3 base){
+vec3 q=p/uScale;
+if(uTex==1){ float m=smoothstep(.56,.6,fbm(q*3.2+4.)); return mix(base,uBase2,m); }
+if(uTex==2){ float w=worley(q*9.); return mix(base,uBase2,1.-smoothstep(.2,.26,w)); }
+if(uTex==3){ float s=sin(q.x*38.+fbm(q*5.)*7.+q.y*6.); return mix(base,uBase2,smoothstep(.2,.9,s)*.85); }
+if(uTex==4){ float n=noise(vec3(q.x*26.,q.y*150.,q.z*150.)); float m=fbm(q*2.5); return mix(base,uBase2,m*.35)*(.82+.3*n); }
+if(uTex==5){ float m=smoothstep(uSad.z-.03*uScale,uSad.z+.03*uScale,p.y)*smoothstep(uSad.x-.04*uScale,uSad.x+.04*uScale,p.x)*(1.-smoothstep(uSad.y-.04*uScale,uSad.y+.04*uScale,p.x)); return mix(base,uBase2,m); }
+return base;
+}
+void main(){
+vec3 N=normalize(vN); if(!gl_FrontFacing) N=-N;
+vec3 V=normalize(uCam-vP); float ndv=clamp(dot(N,V),0.,1.);
+vec3 L=normalize(uLight); vec3 H=normalize(L+V);
+vec3 base=dogTex(vP,uBase);
+vec3 R=reflect(-V,N); vec3 refl=env(R);
+float ndl=max(dot(N,L),0.);
+if(uMat==0){
+float F=0.04+0.96*pow(1.-ndv,3.);
+float nh=max(dot(N,H),0.);
+float sp=pow(nh,300.)*5.0+pow(nh,40.)*0.25;
+vec3 T=refract(-V,N,1./1.5); vec3 refr=env(T)*base;
+float edge=smoothstep(0.65,0.0,ndv);
+float shade=0.72+0.28*(N.y*0.5+0.5);
+vec3 col=refr*shade*(0.98-0.45*edge)+refl*F*0.9+sp;
+col=mix(col,vec3(0.24,0.34,0.50)*base,edge*0.5);
+col+=vec3(0.9,0.95,1.0)*pow(1.-ndv,10.)*0.9;
+col+=base*pow(max(dot(-V,L),0.),6.)*0.3;
+float a = uBack==1 ? 0.3*uOpacity : clamp(uOpacity*0.78+edge*0.5+F*0.25+sp,0.,1.);
+o=vec4(tonemap(col),a); return;
+}
+float sh=shadowAt(vS);
+vec3 amb=mix(vec3(0.42,0.47,0.56),vec3(0.9,0.95,1.05),N.y*0.5+0.5);
+float wrapd=clamp((dot(N,L)+0.3)/1.3,0.,1.);
+vec3 col;
+if(uMat==1){ float F=0.05+0.95*pow(1.-ndv,5.); col=base*(amb*0.6+wrapd*sh*0.9)+refl*F*0.8+pow(max(dot(N,H),0.),120.)*2.*sh; }
+else if(uMat==2){ col=base*(amb*0.65+wrapd*sh*0.85)+base*pow(1.-ndv,3.)*0.15; }
+else { float F=0.6+0.4*pow(1.-ndv,5.); col=refl*base*F+base*pow(max(dot(N,H),0.),90.)*3.*sh; }
+o=vec4(tonemap(col),1.);
+}`;
+const FS_CLOTH = GLSL_COMMON + GLSL_PATTERN + `
+in vec3 vP; in vec3 vN; in vec2 vUV; in vec4 vS; in float vTrim; out vec4 o;
+uniform float uScale, uRot, uRough, uSpec, uSheen; uniform int uWeave; uniform vec2 uOff;
+uniform int uDecalOn; uniform sampler2D uDecal; uniform vec2 uDecalC, uDecalS; uniform float uDecalR;
+uniform int uRefl; uniform float uReflU, uReflW; uniform int uSel;
+vec3 weave(vec3 c, int wv, out float rough){
+rough=uRough; vec2 w=vUV*1000.;
+float fw=max(fwidth(w.x),fwidth(w.y)); float k=clamp(1.-fw/2.,0.,1.);
+if(wv==1){ float s=sin(w.x*2.5)*sin(w.y*2.5); return c*(1.+0.05*s*k); }
+if(wv==2){ float g=max(band(w.x/5.,0.,.12),band(w.y/5.,0.,.12)); return c*(1.+0.12*g*k); }
+if(wv==3){ float s=sin((w.x+w.y)*2.2); float h=noise(vec3(w*0.15,1.)); return mix(c, c*1.5+0.1, (0.18*s+0.18*h-0.1)*k*0.6+0.05); }
+if(wv==4){ float h=fbm(vec3(w*0.35,2.)); return c*(0.86+0.28*h); }
+if(wv==5){ float h=fbm(vec3(w*0.25,3.)); return c*(0.9+0.18*h); }
+if(wv==6){ float col=w.y/3.2, row=w.x/2.6; float v=abs(fract(col)-.5); float st=abs(fract(row+v*1.2)-.5); return c*(1.+(0.16*smoothstep(.1,.4,st)-0.1+0.12*smoothstep(.35,.5,v))*k); }
+if(wv==7){ vec2 g=w/2.2; g.x+=0.5*mod(floor(g.y),2.); float d=length(fract(g)-.5); if(fw<1.2 && d<0.3) discard; return c*(1.-0.15*(1.-k)); }
+if(wv==8){ float g=worley(vec3(w*0.9,0.)); rough=uRough+0.15*g; return c*(0.9+0.14*smoothstep(0.,.6,g)); }
+if(wv==9){ float s=sin(w.y*6.); return c*(1.+0.03*s*k); }
+if(wv==10){ // quilted: puffy diamonds with stitch lines
+vec2 q=vec2(w.x+w.y,w.x-w.y)/55.; vec2 f=abs(fract(q)-.5); float e=min(f.x,f.y);
+float puff=smoothstep(0.,.5,e); float st=band(q.x*6.,0.,.5)*(1.-smoothstep(.0,.03,f.x)) + band(q.y*6.,0.,.5)*(1.-smoothstep(.0,.03,f.y));
+rough=uRough*0.9; return c*(0.7+0.42*puff)*(1.-0.25*st*k); }
+if(wv==11){ float s=abs(sin(w.y*0.9)); rough=0.95; return c*(0.72+0.38*s*k+0.1*(1.-k)); } // corduroy ribs
+if(wv==12){ float h=hash(vec3(floor(w*1.3),4.)); vec3 t=c; if(h>0.9) t=mix(c,uC2,0.7); else if(h<0.08) t=mix(c,uC3,0.7); t*=0.86+0.24*noise(vec3(w*0.8,5.)); return mix(c,t,k*0.9+0.1); } // tweed flecks
+if(wv==13){ float h=fbm(vec3(w*0.45,6.)); float strands=noise(vec3(w.x*0.6,w.y*2.4,7.)); rough=1.; return c*(0.62+0.5*h+0.2*strands); } // faux fur
+return c;
+}
+void main(){
+vec2 uv=rot2(vUV+uOff,uRot)/uScale;
+vec3 base=pattern(uv, vUV.x/max(uLen,1e-4));
+if(uDecalOn==1 && vTrim<0.5){ vec2 d=rot2(vUV-uDecalC,-uDecalR)/uDecalS; if(abs(d.x)<.5&&abs(d.y)<.5){ vec4 t=texture(uDecal,vec2(d.x+.5,.5+d.y)); base=mix(base,t.rgb,t.a); } }
+float trim=vTrim; int wv=uWeave; float sheenA=uSheen;
+if(trim>0.5){ base=uC3; if(trim>1.5){ wv=13; sheenA=0.9; } }
+float rough; base=weave(base,wv,rough);
+vec3 N=normalize(vN); if(!gl_FrontFacing){ N=-N; base*=0.8; }
+vec3 V=normalize(uCam-vP), L=normalize(uLight), H=normalize(L+V);
+float ndl=dot(N,L), ndv=max(dot(N,V),0.);
+float sh=shadowAt(vS);
+vec3 amb=mix(vec3(0.40,0.45,0.55),vec3(0.95,0.98,1.06),N.y*0.5+0.5)*0.62;
+float wrapd=clamp((ndl+0.35)/1.35,0.,1.);
+vec3 col=base*(amb+wrapd*sh*vec3(1.0,0.97,0.93)*0.9);
+col+=base*max(dot(N,normalize(vec3(-0.75,0.35,-0.55))),0.)*0.28;
+float a=max(rough*rough,0.02), nh=max(dot(N,H),0.); float D=a*a/(3.14159*pow(nh*nh*(a*a-1.)+1.,2.));
+float F=uSpec+(1.-uSpec)*pow(1.-max(dot(H,V),0.),5.);
+col+=vec3(D*F*max(ndl,0.)*sh)*0.22;
+vec3 R=reflect(-V,N); float Fe=uSpec+(1.-uSpec)*pow(1.-ndv,5.);
+col+=env(R)*mix(vec3(1.),base,0.35)*Fe*(1.-rough)*0.5;
+col+=base*sheenA*pow(1.-ndv,3.)*0.8+vec3(sheenA*0.06*pow(1.-ndv,4.));
+if(uRefl==1 && trim<0.5){ float d=abs(vUV.x-uReflU); float w=fwidth(d)+1e-5; float m=1.-smoothstep(uReflW-w,uReflW+w,d);
+vec3 rc=vec3(0.72,0.75,0.78)*(amb+wrapd*sh)+env(R)*0.35+vec3(pow(ndv,6.))*0.9; col=mix(col,rc,m); }
+col*=0.82+0.18*smoothstep(-0.7,0.3,N.y);
+if(uSel==1) col+=vec3(0.05,0.12,0.25)*pow(1.-ndv,2.);
+o=vec4(tonemap(col),1.);
+}`;
+const FS_FLOOR = GLSL_COMMON + `
+in vec3 vP; in vec3 vN; in vec2 vUV; in vec4 vS; out vec4 o;
+uniform float uR, uShadowStr; uniform vec2 uC;
+void main(){
+vec2 p=vP.xz-uC; float r=length(p)/uR;
+vec3 c=vec3(0.97,1.0,1.06);
+float ring=smoothstep(0.012,0.0,abs(r-0.42))*0.5; c+=vec3(ring*0.25);
+c*=1.0-0.06*smoothstep(0.42,0.425,r);
+float sh=shadowAt(vS); c*=mix(1.0,1.0-uShadowStr,1.-sh);
+vec3 V=normalize(uCam-vP); c+=env(reflect(-V,vec3(0,1,0)))*0.04;
+o=vec4(tonemap(c*1.12),1.-smoothstep(0.5,1.0,r));
+}`;
+const VS_BG = `#version 300 es
+out vec2 vQ; void main(){ vec2 p=vec2((gl_VertexID<<1)&2, gl_VertexID&2); vQ=p; gl_Position=vec4(p*2.-1.,0.999,1.); }`;
+const FS_BG = `#version 300 es
+precision highp float; in vec2 vQ; out vec4 o;
+void main(){ vec3 a=vec3(0.88,0.94,1.0), b=vec3(0.69,0.82,0.95);
+vec3 c=mix(b,a,smoothstep(0.,1.,vQ.y)); c+=vec3(0.06)*exp(-dot(vQ-vec2(.5,.55),vQ-vec2(.5,.55))*5.); o=vec4(c,1.); }`;
+const FS_PREVIEW = GLSL_COMMON + GLSL_PATTERN + `
+in vec2 vQ; out vec4 o; uniform float uScale;
+void main(){ vec3 c=pattern(vQ*2.0/uScale, vQ.x); o=vec4(pow(c,vec3(1./2.2)),1.); }`;
+const VS_PREVIEW = `#version 300 es
+out vec2 vQ; void main(){ vec2 p=vec2((gl_VertexID<<1)&2, gl_VertexID&2); vQ=p; gl_Position=vec4(p*2.-1.,0.,1.); }`;
+const VS_DEPTH = `#version 300 es
+in vec3 aPos; uniform mat4 uVP; void main(){ gl_Position=uVP*vec4(aPos,1.); }`;
+const FS_DEPTH = `#version 300 es
+precision mediump float; out vec4 o; void main(){ o=vec4(1.); }`;
+const VS_LINE = `#version 300 es
+in vec3 aPos; uniform mat4 uVP; uniform float uPt; void main(){ gl_Position=uVP*vec4(aPos,1.); gl_Position.z-=0.0006*gl_Position.w; gl_PointSize=uPt; }`;
+const FS_LINE = `#version 300 es
+precision mediump float; uniform vec4 uCol; uniform int uRound; out vec4 o;
+void main(){ if(uRound==1){ vec2 c=gl_PointCoord-.5; float d=length(c); if(d>.5) discard; o=vec4(mix(uCol.rgb,vec3(1),smoothstep(.25,.0,length(c-vec2(-.12,-.12)))*.7),uCol.a); return;} o=uCol; }`;
+class Renderer {
+constructor(canvas) {
+this.canvas = canvas;
+const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, preserveDrawingBuffer: false, powerPreference: 'high-performance' });
+if (!gl) throw new Error('webgl2');
+this.gl = gl;
+this.pDog = this.prog(VS_MESH, FS_DOG); this.pCloth = this.prog(VS_MESH, FS_CLOTH); this.pFloor = this.prog(VS_MESH, FS_FLOOR);
+this.pBg = this.prog(VS_BG, FS_BG); this.pPrev = this.prog(VS_PREVIEW, FS_PREVIEW); this.pDepth = this.prog(VS_DEPTH, FS_DEPTH); this.pLine = this.prog(VS_LINE, FS_LINE);
+this.dog = this.meshObj(); this.cloth = this.meshObj(); this.floor = this.meshObj(); this.pinBuf = gl.createBuffer();
+this.emptyVao = gl.createVertexArray();
+this.setShadowSize(2048);
+this.texImg = this.tex1(); this.texDecal = this.tex1();
+this.lightDir = [0.42, 1.0, 0.36];
+}
+prog(vs, fs) {
+const gl = this.gl, p = gl.createProgram();
+for (const [t, src] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s);
+if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error('shader: ' + gl.getShaderInfoLog(s));
+gl.attachShader(p, s);
+}
+gl.bindAttribLocation(p, 0, 'aPos'); gl.bindAttribLocation(p, 1, 'aNrm'); gl.bindAttribLocation(p, 2, 'aUV'); gl.bindAttribLocation(p, 3, 'aTrim');
+gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error('link: ' + gl.getProgramInfoLog(p));
+const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name] = gl.getUniformLocation(p, info.name); }
+return { p, u };
+}
+meshObj() { const gl = this.gl; return { vao: gl.createVertexArray(), pos: gl.createBuffer(), nrm: gl.createBuffer(), uv: gl.createBuffer(), trim: gl.createBuffer(), idx: gl.createBuffer(), line: gl.createBuffer(), count: 0, lineCount: 0, lineDirty: true, data: null }; }
+tex1() { const gl = this.gl, t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 0])); return t; }
+setTexture(which, source) {
+const gl = this.gl, t = which === 'img' ? this.texImg : this.texDecal;
+gl.bindTexture(gl.TEXTURE_2D, t); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+gl.generateMipmap(gl.TEXTURE_2D);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+const wrap = which === 'img' ? gl.REPEAT : gl.CLAMP_TO_EDGE;
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+}
+setShadowSize(sz) {
+const gl = this.gl; if (this.shadowSize === sz) return; this.shadowSize = sz;
+if (this.shadowTex) { gl.deleteTexture(this.shadowTex); gl.deleteFramebuffer(this.shadowFbo); }
+const t = this.shadowTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT24, sz, sz);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+this.shadowFbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowFbo);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, t, 0);
+gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+upload(obj, pos, nrm, uv, idx, dynamic, trim) {
+const gl = this.gl, usage = dynamic ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW;
+gl.bindVertexArray(obj.vao);
+gl.bindBuffer(gl.ARRAY_BUFFER, obj.pos); gl.bufferData(gl.ARRAY_BUFFER, pos, usage); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+gl.bindBuffer(gl.ARRAY_BUFFER, obj.nrm); gl.bufferData(gl.ARRAY_BUFFER, nrm, usage); gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
+if (uv) { gl.bindBuffer(gl.ARRAY_BUFFER, obj.uv); gl.bufferData(gl.ARRAY_BUFFER, uv, gl.STATIC_DRAW); gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 0, 0); }
+else { gl.disableVertexAttribArray(2); gl.vertexAttrib2f(2, 0, 0); }
+if (trim) { gl.bindBuffer(gl.ARRAY_BUFFER, obj.trim); gl.bufferData(gl.ARRAY_BUFFER, trim, gl.STATIC_DRAW); gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 1, gl.FLOAT, false, 0, 0); }
+else { gl.disableVertexAttribArray(3); gl.vertexAttrib1f(3, 0); }
+if (idx) { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW); obj.count = idx.length; obj.idxData = idx; obj.lineDirty = true; }
+gl.bindVertexArray(null);
+}
+updateDynamic(obj, pos, nrm) {
+const gl = this.gl;
+gl.bindBuffer(gl.ARRAY_BUFFER, obj.pos); gl.bufferSubData(gl.ARRAY_BUFFER, 0, pos);
+gl.bindBuffer(gl.ARRAY_BUFFER, obj.nrm); gl.bufferSubData(gl.ARRAY_BUFFER, 0, nrm);
+}
+setDog(mesh) { this.upload(this.dog, mesh.pos, mesh.nrm, null, mesh.idx, false); }
+setCloth(cl) { if (!cl) { this.cloth.count = 0; return; } this.upload(this.cloth, cl.rX, cl.rN, cl.rUV, cl.ridx, true, cl.rTrim); }
+updateCloth(cl) { this.updateDynamic(this.cloth, cl.rX, cl.rN); }
+setFloor(cx, cz, R) {
+const p = new Float32Array([cx - R, 0, cz - R, cx + R, 0, cz - R, cx + R, 0, cz + R, cx - R, 0, cz + R]);
+const n = new Float32Array([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0]);
+this.upload(this.floor, p, n, null, new Uint32Array([0, 2, 1, 0, 3, 2]), false); this.floorR = R; this.floorC = [cx, cz];
+}
+ensureLines(obj) {
+if (!obj.lineDirty || !obj.idxData) return; const gl = this.gl, I = obj.idxData, L = new Uint32Array(I.length * 2);
+for (let t = 0, k = 0; t < I.length; t += 3) { L[k++] = I[t]; L[k++] = I[t + 1]; L[k++] = I[t + 1]; L[k++] = I[t + 2]; L[k++] = I[t + 2]; L[k++] = I[t]; }
+gl.bindVertexArray(obj.vao); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.line); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, L, gl.STATIC_DRAW);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.idx); gl.bindVertexArray(null);
+obj.lineCount = L.length; obj.lineDirty = false;
+}
+drawLines(obj, VP, col) {
+const gl = this.gl; this.ensureLines(obj); const p = this.pLine;
+gl.useProgram(p.p); gl.uniformMatrix4fv(p.u.uVP, false, VP); gl.uniform4fv(p.u.uCol, col); gl.uniform1i(p.u.uRound, 0);
+gl.bindVertexArray(obj.vao); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.line); gl.drawElements(gl.LINES, obj.lineCount, gl.UNSIGNED_INT, 0);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.idx); gl.bindVertexArray(null);
+}
+common(p, R) {
+const gl = this.gl;
+gl.uniform3fv(p.u.uCam, R.eye); gl.uniform3fv(p.u.uLight, this.lightDir);
+if (p.u.uShadow) { gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.shadowTex); gl.uniform1i(p.u.uShadow, 0); }
+if (p.u.uBias) gl.uniform1f(p.u.uBias, R.bias);
+if (p.u.uVP) gl.uniformMatrix4fv(p.u.uVP, false, R.VP);
+if (p.u.uSVP) gl.uniformMatrix4fv(p.u.uSVP, false, R.SVP);
+}
+patternUniforms(p, s) {
+const gl = this.gl;
+gl.uniform3fv(p.u.uC1, s.c1); gl.uniform3fv(p.u.uC2, s.c2); gl.uniform3fv(p.u.uC3, s.c3);
+gl.uniform1i(p.u.uPat, s.pat); if (p.u.uLen) gl.uniform1f(p.u.uLen, s.len || 1);
+if (p.u.uImg) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.texImg); gl.uniform1i(p.u.uImg, 1); }
+}
+render(R) {
+const gl = this.gl, c = this.canvas;
+gl.bindFramebuffer(gl.FRAMEBUFFER, this.shadowFbo); gl.viewport(0, 0, this.shadowSize, this.shadowSize);
+gl.clear(gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
+gl.useProgram(this.pDepth.p); gl.uniformMatrix4fv(this.pDepth.u.uVP, false, R.SVP);
+gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1.5, 2.0);
+if (this.dog.count) { gl.bindVertexArray(this.dog.vao); gl.drawElements(gl.TRIANGLES, this.dog.count, gl.UNSIGNED_INT, 0); }
+if (this.cloth.count && R.cloth) { gl.bindVertexArray(this.cloth.vao); gl.drawElements(gl.TRIANGLES, this.cloth.count, gl.UNSIGNED_INT, 0); }
+gl.disable(gl.POLYGON_OFFSET_FILL);
+gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, c.width, c.height);
+gl.clearColor(0.8, 0.88, 0.97, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+gl.disable(gl.DEPTH_TEST); gl.useProgram(this.pBg.p); gl.bindVertexArray(this.emptyVao); gl.drawArrays(gl.TRIANGLES, 0, 3); gl.enable(gl.DEPTH_TEST);
+gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+let p = this.pFloor; gl.useProgram(p.p); this.common(p, R);
+gl.uniform1f(p.u.uR, this.floorR); gl.uniform2fv(p.u.uC, this.floorC); gl.uniform1f(p.u.uShadowStr, R.model.mat === 0 ? 0.42 : 0.5);
+gl.depthMask(false); gl.bindVertexArray(this.floor.vao); gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_INT, 0); gl.depthMask(true);
+gl.disable(gl.BLEND);
+const md = R.model;
+const drawDog = (back) => {
+p = this.pDog; gl.useProgram(p.p); this.common(p, R);
+gl.uniform3fv(p.u.uBase, md.c); gl.uniform3fv(p.u.uBase2, md.c2); gl.uniform1i(p.u.uMat, md.mat); gl.uniform1i(p.u.uTex, md.tex);
+gl.uniform1f(p.u.uOpacity, md.opacity); gl.uniform1f(p.u.uScale, md.scale); gl.uniform3fv(p.u.uSad, md.sad); gl.uniform1i(p.u.uBack, back ? 1 : 0);
+gl.bindVertexArray(this.dog.vao); gl.drawElements(gl.TRIANGLES, this.dog.count, gl.UNSIGNED_INT, 0);
+};
+if (md.mat !== 0 && this.dog.count) { gl.enable(gl.CULL_FACE); gl.cullFace(gl.BACK); drawDog(false); gl.disable(gl.CULL_FACE); }
+if (this.cloth.count && R.cloth) {
+const s = R.cloth; p = this.pCloth; gl.useProgram(p.p); this.common(p, R); this.patternUniforms(p, s);
+gl.uniform1f(p.u.uScale, s.scale); gl.uniform1f(p.u.uRot, s.rot); gl.uniform2fv(p.u.uOff, s.off);
+gl.uniform1f(p.u.uRough, s.rough); gl.uniform1f(p.u.uSpec, s.spec); gl.uniform1f(p.u.uSheen, s.sheen); gl.uniform1i(p.u.uWeave, s.weave);
+gl.uniform1i(p.u.uDecalOn, s.decalOn ? 1 : 0); gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.texDecal); gl.uniform1i(p.u.uDecal, 2);
+gl.uniform2fv(p.u.uDecalC, s.decalC); gl.uniform2fv(p.u.uDecalS, s.decalS); gl.uniform1f(p.u.uDecalR, s.decalR);
+gl.uniform1i(p.u.uRefl, s.refl ? 1 : 0); gl.uniform1f(p.u.uReflU, s.reflU); gl.uniform1f(p.u.uReflW, s.reflW); gl.uniform1i(p.u.uSel, s.sel ? 1 : 0);
+gl.bindVertexArray(this.cloth.vao); gl.drawElements(gl.TRIANGLES, this.cloth.count, gl.UNSIGNED_INT, 0);
+}
+if (R.wire) {
+gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+if (this.cloth.count && R.cloth) this.drawLines(this.cloth, R.VP, [0.05, 0.25, 0.6, 0.55]);
+if (this.dog.count) this.drawLines(this.dog, R.VP, [0.1, 0.35, 0.7, 0.18]);
+gl.disable(gl.BLEND);
+}
+if (R.pins && R.pins.length) {
+gl.bindBuffer(gl.ARRAY_BUFFER, this.pinBuf); gl.bufferData(gl.ARRAY_BUFFER, R.pins, gl.DYNAMIC_DRAW);
+p = this.pLine; gl.useProgram(p.p); gl.uniformMatrix4fv(p.u.uVP, false, R.VP); gl.uniform4fv(p.u.uCol, [0.9, 0.2, 0.3, 1]); gl.uniform1i(p.u.uRound, 1); gl.uniform1f(p.u.uPt, 11 * R.dpr);
+gl.bindVertexArray(this.emptyVao); gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+gl.drawArrays(gl.POINTS, 0, R.pins.length / 3); gl.disableVertexAttribArray(0);
+}
+if (md.mat === 0 && this.dog.count) { // glass: back faces then front faces, blended
+gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false); gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.FRONT); drawDog(true); gl.cullFace(gl.BACK); drawDog(false);
+gl.disable(gl.CULL_FACE); gl.depthMask(true); gl.disable(gl.BLEND);
+}
+gl.bindVertexArray(null);
+}
+previews(ids, s, size) {
+const gl = this.gl, out = [];
+if (!this.prevFbo) {
+this.prevTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, this.prevTex); gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA8, size, size);
+this.prevFbo = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, this.prevFbo); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.prevTex, 0);
+}
+gl.bindFramebuffer(gl.FRAMEBUFFER, this.prevFbo); gl.viewport(0, 0, size, size); gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+const p = this.pPrev; gl.useProgram(p.p); gl.bindVertexArray(this.emptyVao);
+for (const id of ids) {
+this.patternUniforms(p, Object.assign({}, s, { pat: id })); gl.uniform1f(p.u.uScale, 1);
+gl.drawArrays(gl.TRIANGLES, 0, 3);
+const px = new Uint8Array(size * size * 4); gl.readPixels(0, 0, size, size, gl.RGBA, gl.UNSIGNED_BYTE, px); out.push(px);
+}
+gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.enable(gl.DEPTH_TEST);
+return out;
+}
+}
+'use strict';
+const $ = s => document.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => { const e = document.createElement(tag); for (const [k, v] of Object.entries(attrs)) { if (k === 'class') e.className = v; else if (k.startsWith('on')) e.addEventListener(k.slice(2), v); else if (k === 'html') e.innerHTML = v; else e.setAttribute(k, v); } for (const c of kids) if (c != null) e.append(c); return e; };
+const lin = h => hexToRgb(h).map(v => Math.pow(v / 255, 2.2));
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } } };
+function defaultState() {
+return {
+v: 1, name: 'Mi diseño', breedId: 'golden', dog: breedParams('golden'),
+garment: 'hoodie', g: { len: 1, pos: 0, ease: 0, fit: 1, sleeves: 1, hood: 'auto', collar: 'none', cape: false, ribTrim: false },
+fabricId: 'polar', fabric: Object.assign({}, FABRICS.polar),
+colors: ['#2f7de1', '#ffffff', '#ffd60a'], slot: 0,
+pattern: 0, patScale: 1, patRot: 0, patImg: null,
+decal: { on: true, kind: 'text', text: 'LUNA', font: "'Bricolage Grotesque', sans-serif", color: '#ffffff', img: null, u: 0.4, v: 0, size: 0.9, rot: 0 },
+refl: { on: false, pos: 0.45 },
+model: { mat: 0, color: '#ffffff', opacity: 0.55, tex: 0, color2: '#7a5a3c' },
+sim: { wind: 0, pose: 0 }
+};
+}
+let S = defaultState();
+const QUALITY = [
+{ dpr: 1, res: 56, anim: 34, shadow: 1024, sub: 8, nv: 0 },
+{ dpr: 1.5, res: 72, anim: 42, shadow: 2048, sub: 10, nv: 1 },
+{ dpr: 2, res: 92, anim: 52, shadow: 2048, sub: 12, nv: 2 }
+];
+let qMode = 'auto', qLevel = 1;
+let renderer, dog, G, cloth = null, measures = null;
+let playing = true, wire = false, spin = false, animPhase = 0;
+const cam = { th: 0.85, ph: 0.26, dist: 2, tgt: [0, 0.3, 0], fov: 32 * Math.PI / 180, goal: null };
+let VP = null, eye = [0, 0, 0];
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200); }
+function openModal(node) { const b = $('#modalBody'); b.innerHTML = ''; b.append(node); $('#modal').hidden = false; $('#modalClose').focus(); }
+function closeModal() { $('#modal').hidden = true; }
+const hist = { stack: [], i: -1, t: 0 };
+function snapshot() { return JSON.stringify(S); }
+function commit(now) {
+clearTimeout(hist.t);
+const go = () => { const s = snapshot(); if (hist.stack[hist.i] === s) return; hist.stack = hist.stack.slice(0, hist.i + 1); hist.stack.push(s); if (hist.stack.length > 80) hist.stack.shift(); hist.i = hist.stack.length - 1; store.set('dfs.current', S); };
+if (now) go(); else hist.t = setTimeout(go, 400);
+}
+function restore(json) {
+const prev = S; S = JSON.parse(json);
+const dogChanged = JSON.stringify(prev.dog) !== JSON.stringify(S.dog);
+const gChanged = dogChanged || prev.garment !== S.garment || JSON.stringify(prev.g) !== JSON.stringify(S.g);
+if (prev.patImg !== S.patImg) loadPatImg(S.patImg);
+if (JSON.stringify(prev.decal) !== JSON.stringify(S.decal)) refreshDecalTex();
+buildUI();
+if (dogChanged) rebuildDog(); else if (gChanged) rebuildGarment(); else if (cloth) cloth.setFabric(S.fabric, S.g.fit);
+refreshTips();
+}
+function undo() { if (hist.i > 0) { hist.i--; restore(hist.stack[hist.i]); toast('Deshecho'); } }
+function redo() { if (hist.i < hist.stack.length - 1) { hist.i++; restore(hist.stack[hist.i]); toast('Rehecho'); } }
+let dogTimer = 0, gTimer = 0;
+function scheduleDog() { clearTimeout(dogTimer); dogTimer = setTimeout(rebuildDog, 120); }
+function scheduleGarment() { clearTimeout(gTimer); gTimer = setTimeout(rebuildGarment, 150); }
+let lastBreedFit = null;
+function rebuildDog() {
+const Q = QUALITY[qLevel];
+dog = buildDog(S.dog, 0, 0);
+G = buildGrid(dog, Q.res);
+renderer.setDog(surfaceNets(G));
+const b = dog.bounds, cx = (b.min[0] + b.max[0]) / 2;
+renderer.setFloor(cx, 0, Math.max(b.max[0] - b.min[0], dog.H) * 2.6);
+measures = measureDog(dog);
+const key = S.breedId + ':' + S.dog.h.toFixed(2) + ':' + S.dog.len.toFixed(2);
+if (key !== lastBreedFit) { fitCamera(); lastBreedFit = key; }
+renderMeasures();
+rebuildGarment();
+}
+function rebuildGarment() {
+clearTimeout(gTimer);
+if (!dog) return;
+const Q = QUALITY[qLevel];
+if (!GARMENTS[S.garment]) { cloth = null; renderer.setCloth(null); renderStats(); return; }
+cloth = buildGarment(dog, S.garment, S.g, Q.nv);
+cloth.setFabric(S.fabric, S.g.fit); cloth.sub = Q.sub; cloth.iters = qLevel > 0 ? 2 : 1;
+let uMax = 0, vMax = 0; for (let i = 0; i < cloth.n; i++) { if (cloth.UV[i * 2] >= 9) continue; uMax = Math.max(uMax, cloth.UV[i * 2]); vMax = Math.max(vMax, Math.abs(cloth.UV[i * 2 + 1])); }
+cloth.uMax = uMax; cloth.vMax = vMax;
+cloth.maxGrabStep = dog.H * 0.004;
+const settle = (S.g.cape || GARMENTS[S.garment].cape || GARMENTS[S.garment].bandana) ? 150 : 70;
+for (let i = 0; i < settle; i++) cloth.step(1 / 60, G, 0);
+if (S.sim.pose > 0) animPhase = 0;
+renderer.setCloth(cloth);
+renderStats();
+}
+function animateDog(dt) {
+const Q = QUALITY[qLevel];
+animPhase += dt * (S.sim.pose === 1 ? 5.5 : 9.5);
+const d = buildDog(S.dog, animPhase, S.sim.pose === 1 ? 0.75 : 1.0);
+G = buildGrid(d, Q.anim);
+renderer.setDog(surfaceNets(G));
+}
+function stopAnimation() { const Q = QUALITY[qLevel]; G = buildGrid(dog, Q.res); renderer.setDog(surfaceNets(G)); }
+function fitCamera() {
+const b = dog.bounds; const ex = b.max[0] - b.min[0], ey = dog.H * 1.25;
+cam.tgt = [(b.min[0] + b.max[0]) / 2, ey * 0.42, 0];
+const size = Math.max(ex * 0.95, ey);
+cam.dist = size / (2 * Math.tan(cam.fov / 2)) * 1.7;
+}
+const VIEWS = [[0.85, 0.26], [Math.PI / 2, 0.08], [0.02, 0.1], [Math.PI / 2, 1.42], [Math.PI, 0.18]];
+function setView(i) { const [th, ph] = VIEWS[i]; let d = th - cam.th; d = Math.atan2(Math.sin(d), Math.cos(d)); cam.goal = [cam.th + d, ph]; spin = false; $('#spinBtn').classList.remove('on'); }
+function computeMatrices() {
+const c = renderer.canvas, W = c.clientWidth, H = c.clientHeight;
+const cp = Math.cos(cam.ph);
+eye = [cam.tgt[0] + cam.dist * cp * Math.cos(cam.th), cam.tgt[1] + cam.dist * Math.sin(cam.ph), cam.tgt[2] + cam.dist * cp * Math.sin(cam.th)];
+const P = M4.persp(cam.fov, W / H, cam.dist * 0.05, cam.dist * 8);
+if (W > 860) { const l = $('.left').getBoundingClientRect().right, r = W - $('.right').getBoundingClientRect().left; P[8] = -(l - r) / W; }
+else { // phone: centre the dog between the top bar and the toolbar
+const top = $('.top').getBoundingClientRect().bottom, bot = $('.bottom').getBoundingClientRect().top;
+if (bot > top) { const cy = (top + bot) / 2; P[9] = (cy - H / 2) / H * 2; const sc = Math.max((bot - top) / H, 0.3); P[0] *= sc * 1.1; P[5] *= sc * 1.1; }
+}
+const V = M4.lookAt(eye, cam.tgt, [0, 1, 0]);
+VP = M4.mul(P, V);
+}
+function shadowMatrix() {
+const L = renderer.lightDir, l = Math.hypot(...L), b = dog.bounds;
+const ext = Math.max(b.max[0] - b.min[0], dog.H * 1.3) * 0.95;
+const c = [cam.tgt[0], dog.H * 0.4, 0];
+const e = [c[0] + L[0] / l * ext * 3, c[1] + L[1] / l * ext * 3, c[2] + L[2] / l * ext * 3];
+return M4.mul(M4.ortho(-ext, ext, -ext, ext, ext * 0.5, ext * 6), M4.lookAt(e, c, [0, 1, 0]));
+}
+function resize() {
+const c = renderer.canvas, Q = QUALITY[qLevel];
+const dpr = Math.min(window.devicePixelRatio || 1, Q.dpr);
+const w = Math.round(c.clientWidth * dpr), h = Math.round(c.clientHeight * dpr);
+if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+renderer.dpr = dpr;
+}
+function lookParams() {
+const f = S.fabric, H = dog.H;
+const uLen = cloth ? cloth.uMax : 1, vMax = cloth ? cloth.vMax : 1;
+const dw = S.decal.size * H * 0.32, asp = decalAspect || 0.35;
+return {
+c1: lin(S.colors[0]), c2: lin(S.colors[1]), c3: lin(S.colors[2]), pat: S.pattern === 12 && !patImgLoaded ? 0 : S.pattern,
+scale: H * 0.16 * S.patScale, rot: S.patRot * Math.PI / 180, off: [0, 0], len: uLen,
+rough: f.rough, spec: f.spec, sheen: f.sheen, weave: f.weave,
+decalOn: S.decal.on && decalReady, decalC: [S.decal.u * uLen, S.decal.v * vMax], decalS: [dw, dw * asp], decalR: S.decal.rot * Math.PI / 180,
+refl: S.refl.on, reflU: S.refl.pos * uLen, reflW: H * 0.014
+};
+}
+function draw(forPhoto) {
+resize(); computeMatrices();
+const R = {
+VP, SVP: shadowMatrix(), eye, bias: 0.0015, wire, dpr: renderer.dpr,
+model: { c: lin(S.model.color), c2: lin(S.model.color2), mat: +S.model.mat, tex: +S.model.tex, opacity: S.model.opacity, scale: dog.H, sad: [dog.xh * 0.95, dog.xs * 0.95, dog.yc + dog.rc * 0.35] },
+cloth: cloth ? lookParams() : null,
+pins: null
+};
+if (cloth && cloth.pins.size && !forPhoto) { const a = []; for (const i of cloth.pins) if (!cloth.fixed.has(i)) a.push(cloth.X[i * 3], cloth.X[i * 3 + 1], cloth.X[i * 3 + 2]); if (a.length) R.pins = new Float32Array(a); }
+renderer.render(R);
+}
+let last = performance.now(), fpsAcc = 0, fpsN = 0, fpsT = 0, autoT = 0, autoN = 0, autoDone = false, frameN = 0;
+function frame(now) {
+const dt = Math.min((now - last) / 1000, 0.05); last = now; frameN++;
+if (spin) cam.th += dt * 0.45;
+if (cam.goal) { cam.th += (cam.goal[0] - cam.th) * Math.min(1, dt * 7); cam.ph += (cam.goal[1] - cam.ph) * Math.min(1, dt * 7); if (Math.abs(cam.goal[0] - cam.th) < 1e-3 && Math.abs(cam.goal[1] - cam.ph) < 1e-3) cam.goal = null; }
+const t0 = performance.now();
+if (playing && dog) {
+if (S.sim.pose > 0 && (qLevel > 0 || frameN % 2 === 0)) animateDog(qLevel > 0 ? dt : dt * 2);
+if (cloth) { cloth.step(1 / 60, G, S.sim.wind); renderer.updateCloth(cloth); if (cloth.released) { cloth.released = false; if (drag && drag.kind === 'grab') drag = null; toast('Solté la tela para que no se rompa'); } }
+}
+if (dog) draw(false);
+const ms = performance.now() - t0;
+fpsAcc += dt; fpsN++;
+if (fpsAcc > 0.5) { $('#fps').textContent = Math.round(fpsN / fpsAcc) + ' fps'; fpsAcc = 0; fpsN = 0; }
+if (qMode === 'auto' && !autoDone && frameN > 30) { autoT += dt; autoN++; if (autoN >= 90) { const avg = autoT / autoN; autoDone = true; if (avg > 1 / 30 && qLevel > 0) setQuality(0, true); } }
+requestAnimationFrame(frame);
+}
+function setQuality(l, auto) { qLevel = l; renderer.setShadowSize(QUALITY[l].shadow); rebuildDog(); if (auto) toast('Calidad ajustada a Baja para tu equipo'); }
+const ptrs = new Map(); let drag = null, pinchD = 0;
+function canvasXY(e) { const r = renderer.canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+function project(x, y, z) { const w = VP[3] * x + VP[7] * y + VP[11] * z + VP[15]; if (w <= 0) return null; const c = renderer.canvas; return [((VP[0] * x + VP[4] * y + VP[8] * z + VP[12]) / w * 0.5 + 0.5) * c.clientWidth, (1 - ((VP[1] * x + VP[5] * y + VP[9] * z + VP[13]) / w * 0.5 + 0.5)) * c.clientHeight, w]; }
+function pick(mx, my) {
+if (!cloth || !VP) return -1; let best = -1, bw = 1e9; const X = cloth.X, r2 = 20 * 20;
+for (let i = 0; i < cloth.n; i++) { const p = project(X[i * 3], X[i * 3 + 1], X[i * 3 + 2]); if (!p) continue; const d = (p[0] - mx) ** 2 + (p[1] - my) ** 2; if (d < r2 && p[2] < bw) { bw = p[2]; best = i; } }
+return best;
+}
+function rayAt(mx, my) {
+const c = renderer.canvas, nx = mx / c.clientWidth * 2 - 1, ny = 1 - my / c.clientHeight * 2, inv = M4.inv(VP);
+const un = (z) => { const x = inv[0] * nx + inv[4] * ny + inv[8] * z + inv[12], y = inv[1] * nx + inv[5] * ny + inv[9] * z + inv[13], zz = inv[2] * nx + inv[6] * ny + inv[10] * z + inv[14], w = inv[3] * nx + inv[7] * ny + inv[11] * z + inv[15]; return [x / w, y / w, zz / w]; };
+const a = un(-1), b = un(1); const d = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], l = Math.hypot(...d); return [a, [d[0] / l, d[1] / l, d[2] / l]];
+}
+function hideHint() { $('#viewHint').classList.add('hide'); }
+function bindCanvas() {
+const c = renderer.canvas;
+c.addEventListener('contextmenu', e => e.preventDefault());
+c.addEventListener('pointerdown', e => {
+c.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, canvasXY(e)); hideHint();
+if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinchD = Math.hypot(a[0] - b[0], a[1] - b[1]); if (drag && drag.kind === 'grab') releaseGrab(); drag = { kind: 'pinch' }; return; }
+const [mx, my] = canvasXY(e);
+if (e.button === 2 || e.shiftKey) { drag = { kind: 'pan', x: mx, y: my }; return; }
+const i = pick(mx, my);
+if (i >= 0 && !cloth.pins.has(i)) {
+const p = [cloth.X[i * 3], cloth.X[i * 3 + 1], cloth.X[i * 3 + 2]];
+const n = [cam.tgt[0] - eye[0], cam.tgt[1] - eye[1], cam.tgt[2] - eye[2]], nl = Math.hypot(...n);
+drag = { kind: 'grab', i, p0: p, n: [n[0] / nl, n[1] / nl, n[2] / nl], w: cloth.W[i] };
+cloth.W[i] = 0; cloth.startGrab(i, p.slice()); c.style.cursor = 'grabbing';
+} else drag = { kind: 'orbit', x: mx, y: my };
+});
+c.addEventListener('pointermove', e => {
+const [mx, my] = canvasXY(e);
+if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, [mx, my]);
+if (!drag) { c.style.cursor = cloth && pick(mx, my) >= 0 ? 'grab' : 'default'; return; }
+if (drag.kind === 'pinch' && ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (pinchD > 0) cam.dist = clamp(cam.dist * pinchD / d, dog.H * 0.8, dog.H * 12); pinchD = d; return; }
+if (drag.kind === 'orbit') { cam.th += (mx - drag.x) * 0.008; cam.ph = clamp(cam.ph + (my - drag.y) * 0.006, -0.05, 1.5); drag.x = mx; drag.y = my; cam.goal = null; }
+else if (drag.kind === 'pan') {
+const s = cam.dist * 0.0015, f = [cam.tgt[0] - eye[0], 0, cam.tgt[2] - eye[2]], fl = Math.hypot(f[0], f[2]) || 1; const r = [-f[2] / fl, 0, f[0] / fl];
+cam.tgt[0] -= r[0] * (mx - drag.x) * s; cam.tgt[2] -= r[2] * (mx - drag.x) * s; cam.tgt[1] = clamp(cam.tgt[1] + (my - drag.y) * s, 0, dog.H * 1.5); drag.x = mx; drag.y = my;
+} else if (drag.kind === 'grab') {
+if (!cloth.grab) { drag = null; return; }
+const [o, d] = rayAt(mx, my); const n = drag.n, p0 = drag.p0;
+const den = d[0] * n[0] + d[1] * n[1] + d[2] * n[2]; if (Math.abs(den) < 1e-6) return;
+const t = ((p0[0] - o[0]) * n[0] + (p0[1] - o[1]) * n[1] + (p0[2] - o[2]) * n[2]) / den;
+let gp = [o[0] + d[0] * t, Math.max(o[1] + d[1] * t, 0.003), o[2] + d[2] * t];
+const lim = dog.H * 0.3, ox = gp[0] - p0[0], oy = gp[1] - p0[1], oz = gp[2] - p0[2], ol = Math.hypot(ox, oy, oz);
+if (ol > lim) gp = [p0[0] + ox / ol * lim, p0[1] + oy / ol * lim, p0[2] + oz / ol * lim]; // can't yank the garment off the dog
+cloth.grab.p = gp;
+}
+});
+const end = e => { ptrs.delete(e.pointerId); if (drag && drag.kind === 'grab') releaseGrab(); if (ptrs.size === 0) drag = null; c.style.cursor = 'default'; };
+c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+let lastTap = 0, lastTapXY = [0, 0];
+c.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') return; const now = performance.now(), xy = canvasXY(e); if (now - lastTap < 320 && Math.hypot(xy[0] - lastTapXY[0], xy[1] - lastTapXY[1]) < 25) { const i = pick(xy[0], xy[1]); if (i >= 0) toast(cloth.togglePin(i) ? 'Alfiler puesto' : 'Alfiler quitado'); lastTap = 0; } else { lastTap = now; lastTapXY = xy; } });
+c.addEventListener('dblclick', e => { if (matchMedia('(pointer:coarse)').matches) return;
+const [mx, my] = canvasXY(e); const i = pick(mx, my); if (i < 0) return;
+const on = cloth.togglePin(i); toast(on ? 'Alfiler puesto' : 'Alfiler quitado');
+});
+c.addEventListener('wheel', e => { e.preventDefault(); hideHint(); cam.dist = clamp(cam.dist * Math.exp(e.deltaY * 0.0012), dog.H * 0.8, dog.H * 12); }, { passive: false });
+}
+function releaseGrab() { if (!drag || drag.kind !== 'grab') return; if (!cloth.pins.has(drag.i)) cloth.W[drag.i] = drag.w; cloth.grab = null; cloth.grabNb = null; drag = null; }
+function ctl(parent, o) {
+const id = 'c_' + Math.random().toString(36).slice(2, 8);
+const out = el('output', { for: id });
+const fmt = o.fmt || (v => (+v).toFixed(o.step < 0.1 ? 2 : 1));
+const inp = el('input', { type: 'range', id, min: o.min, max: o.max, step: o.step });
+inp.value = o.get(); out.textContent = fmt(inp.value);
+inp.addEventListener('input', () => { out.textContent = fmt(inp.value); o.set(+inp.value); });
+inp.addEventListener('change', () => commit());
+parent.append(el('div', { class: 'ctl' }, el('div', { class: 'ctl-h' }, el('label', { for: id }, o.label), out), inp));
+return inp;
+}
+function toggle(parent, label, get, set) {
+const id = 't_' + Math.random().toString(36).slice(2, 8);
+const inp = el('input', { type: 'checkbox', id }); inp.checked = get();
+inp.addEventListener('change', () => { set(inp.checked); commit(); });
+parent.append(el('label', { class: 'toggle', for: id }, label, inp)); return inp;
+}
+function tabs() {
+document.querySelectorAll('.tabs').forEach(nav => nav.addEventListener('click', e => {
+const b = e.target.closest('.tab'); if (!b) return; const panel = nav.parentElement;
+nav.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === b));
+panel.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.dataset.pane === b.dataset.tab));
+}));
+}
+function buildUI() {
+$('#projName').value = S.name;
+buildBreeds(); buildShape(); buildGarments(); buildFabrics(); buildColors(); buildDesign(); buildModel(); buildFit();
+$('#wind').value = S.sim.wind; $('#pose').value = S.sim.pose;
+}
+function buildBreeds() {
+const q = ($('#breedSearch').value || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const list = $('#breedList'); list.innerHTML = '';
+for (const [id, name, p] of BREEDS) {
+const nn = name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+if (q && !nn.includes(q)) continue;
+const h = (p.h || DOG_DEFAULT.h);
+list.append(el('button', { class: 'breed' + (id === S.breedId ? ' on' : ''), onclick: () => { S.breedId = id; S.dog = breedParams(id); buildBreeds(); buildShape(); rebuildDog(); refreshTips(); commit(true); } }, name, el('small', {}, sizeClass(h) + ' · ' + Math.round(h * 100) + ' cm')));
+}
+if (!list.children.length) list.append(el('p', { class: 'hint' }, 'Ninguna raza coincide. Usa "Mestizo" y ajusta la forma abajo para crear cualquier perro.'));
+}
+function buildShape() {
+const box = $('#shapeCtl'); box.innerHTML = '';
+const earSel = el('select', { class: 'field', id: 'earType' }); [['erect', 'Erguidas'], ['floppy', 'Caídas'], ['semi', 'Semi caídas'], ['bat', 'De murciélago']].forEach(([v, t]) => earSel.append(el('option', { value: v }, t))); earSel.value = S.dog.ear;
+earSel.onchange = () => { S.dog.ear = earSel.value; scheduleDog(); commit(); };
+const tailSel = el('select', { class: 'field', id: 'tailType' }); [['down', 'Caída'], ['up', 'Alzada'], ['curl', 'Enroscada'], ['saber', 'Sable'], ['otter', 'De nutria'], ['stub', 'Corta']].forEach(([v, t]) => tailSel.append(el('option', { value: v }, t))); tailSel.value = S.dog.tail;
+tailSel.onchange = () => { S.dog.tail = tailSel.value; scheduleDog(); commit(); };
+box.append(el('div', { class: 'grid2' }, el('label', { class: 'lbl' }, 'Orejas', earSel), el('label', { class: 'lbl' }, 'Cola', tailSel)));
+for (const [k, label, mn, mx, st, fmt] of SHAPE_CTL) ctl(box, { label, min: mn, max: mx, step: st, fmt, get: () => S.dog[k] ?? DOG_DEFAULT[k], set: v => { S.dog[k] = v; scheduleDog(); } });
+box.append(el('button', { class: 'btn small ghost', onclick: () => { S.dog = breedParams(S.breedId); buildShape(); rebuildDog(); commit(true); } }, 'Restablecer raza'));
+}
+function svgIcon(path) { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 32 30'); s.innerHTML = `<path d="${path}" fill="rgba(28,111,216,.18)" stroke="#1c6fd8" stroke-width="1.6" stroke-linejoin="round"/>`; return s; }
+function buildGarments() {
+const list = $('#garmentList'); list.innerHTML = '';
+for (const [k, gd] of Object.entries(GARMENTS)) list.append(el('button', { class: 'gcard' + (k === S.garment ? ' on' : ''), onclick: () => selectGarment(k) }, svgIcon(gd.icon), gd.name, el('small', {}, gd.desc)));
+list.append(el('button', { class: 'gcard' + (S.garment === 'none' ? ' on' : ''), onclick: () => { S.garment = 'none'; buildGarments(); rebuildGarment(); refreshTips(); commit(true); } }, svgIcon('M16 6a10 10 0 100 20 10 10 0 000-20zM9 9l14 14'), 'Sin prenda', el('small', {}, 'Ver solo la maqueta')));
+const box = $('#garmentCtl'); box.innerHTML = ''; const gd = GARMENTS[S.garment];
+if (!gd) { box.append(el('p', { class: 'hint' }, 'Elige una prenda para ajustarla.')); return; }
+ctl(box, { label: 'Largo', min: .55, max: 1.35, step: .01, fmt: v => Math.round(v * 100) + ' %', get: () => S.g.len, set: v => { S.g.len = v; scheduleGarment(); } });
+ctl(box, { label: 'Posición (cola ↔ cuello)', min: -.12, max: .12, step: .005, fmt: v => (v > 0 ? '+' : '') + Math.round(v * 100), get: () => S.g.pos, set: v => { S.g.pos = v; scheduleGarment(); } });
+ctl(box, { label: 'Holgura extra', min: -1, max: 4, step: .1, fmt: v => (+v).toFixed(1) + ' cm', get: () => S.g.ease, set: v => { S.g.ease = v; scheduleGarment(); } });
+ctl(box, { label: 'Pegado al cuerpo', min: .82, max: 1.18, step: .01, fmt: v => v < 0.98 ? 'Ceñido ' + Math.round((1 - v) * 100) + ' %' : v > 1.02 ? 'Suelto ' + Math.round((v - 1) * 100) + ' %' : 'Normal', get: () => S.g.fit, set: v => { S.g.fit = v; if (cloth) cloth.setFabric(S.fabric, v); renderStats(); } });
+if (gd.sleeves) ctl(box, { label: 'Largo de mangas', min: 0, max: 1.8, step: .05, fmt: v => v < 0.05 ? 'Sin mangas' : Math.round(v * 100) + ' %', get: () => S.g.sleeves, set: v => { S.g.sleeves = v; scheduleGarment(); } });
+const accessory = gd.bandana || gd.cape;
+if (!accessory) {
+const hoodOn = () => S.g.hood === 'on' || (S.g.hood !== 'off' && S.g.hood !== false && !!gd.hood);
+box.append(el('h4', {}, 'Personalizar'));
+const cs = el('select', { class: 'field', id: 'collarSel' }); [['none', 'Normal'], ['alto', 'Cuello alto'], ['solapa', 'Solapa de abrigo'], ['piel', 'Cuello de piel sintética']].forEach(([v, t]) => cs.append(el('option', { value: v }, t)));
+cs.value = S.g.collar || 'none'; cs.onchange = () => { S.g.collar = cs.value; rebuildGarment(); commit(); };
+box.append(el('label', { class: 'lbl', for: 'collarSel' }, 'Cuello'), cs);
+toggle(box, 'Capucha', hoodOn, v => { S.g.hood = v ? 'on' : 'off'; rebuildGarment(); refreshTips(); });
+toggle(box, 'Capa encima', () => !!S.g.cape, v => { S.g.cape = v; rebuildGarment(); });
+toggle(box, 'Puños y bordes en color Detalle', () => !!S.g.ribTrim, v => { S.g.ribTrim = v; rebuildGarment(); });
+box.append(el('p', { class: 'hint' }, 'Los cuellos, la capa encima y los bordes usan el color Detalle (pestaña Color).'));
+}
+box.append(el('div', { class: 'row' }, el('button', { class: 'btn small ghost', onclick: () => { S.g = { len: 1, pos: 0, ease: 0, fit: 1, sleeves: 1, hood: 'auto', collar: 'none', cape: false, ribTrim: false }; buildGarments(); rebuildGarment(); commit(true); } }, 'Restablecer ajuste'), el('button', { class: 'btn small ghost', onclick: () => { if (cloth) { cloth.clearPins(); toast('Alfileres quitados'); } } }, 'Quitar alfileres')));
+}
+function selectGarment(k) {
+S.garment = k; const gd = GARMENTS[k];
+S.fabricId = gd.fabric; S.fabric = Object.assign({}, FABRICS[gd.fabric]);
+S.refl.on = !!gd.reflective;
+if (k === 'impermeable' && S.colors[0] === '#2f7de1') S.colors = ['#ffd60a', '#1d3557', '#d9d9d9'];
+buildGarments(); buildFabrics(); buildDesign(); buildColors(); rebuildGarment(); refreshTips(); commit(true);
+}
+function customFabrics() { return store.get('dfs.fabrics', {}); }
+function allFabrics() { return Object.assign({}, FABRICS, customFabrics()); }
+function buildFabrics() {
+const list = $('#fabricList'); list.innerHTML = '';
+for (const [k, f] of Object.entries(allFabrics())) {
+list.append(el('button', { class: 'fab' + (k === S.fabricId ? ' on' : ''), onclick: () => { S.fabricId = k; S.fabric = Object.assign({}, allFabrics()[k]); buildFabrics(); if (cloth) cloth.setFabric(S.fabric, S.g.fit); refreshTips(); commit(true); } },
+el('i', { style: `background:${f.swatch || '#ddd'}` }), el('span', {}, f.name, el('small', {}, f.note || 'Tela personalizada')), el('em', {}, f.weight + ' g/m²')));
+}
+const box = $('#fabricCtl'); box.innerHTML = '';
+const apply = () => { if (cloth) cloth.setFabric(S.fabric, S.g.fit); refreshTips(); };
+const lg = (a, b, v) => Math.log(v / a) / Math.log(b / a), ex = (a, b, t) => a * Math.pow(b / a, t);
+ctl(box, { label: 'Elasticidad', min: 0, max: 1, step: .01, fmt: v => v < .33 ? 'Firme' : v < .66 ? 'Media' : 'Muy elástica', get: () => lg(5e-5, 1.2e-2, S.fabric.stretch), set: v => { S.fabric.stretch = ex(5e-5, 1.2e-2, v); apply(); } });
+ctl(box, { label: 'Rigidez al doblar', min: 0, max: 1, step: .01, fmt: v => v < .33 ? 'Fluida' : v < .66 ? 'Media' : 'Rígida', get: () => 1 - lg(.04, 8, S.fabric.bend), set: v => { S.fabric.bend = ex(.04, 8, 1 - v); apply(); } });
+ctl(box, { label: 'Peso (gramaje)', min: 60, max: 500, step: 5, fmt: v => v + ' g/m²', get: () => S.fabric.weight, set: v => { S.fabric.weight = v; apply(); renderStats(); } });
+ctl(box, { label: 'Fricción', min: 0, max: 1, step: .01, get: () => S.fabric.fric, set: v => { S.fabric.fric = v; apply(); } });
+ctl(box, { label: 'Grosor', min: .2, max: 3, step: .05, fmt: v => (+v).toFixed(1) + ' mm', get: () => S.fabric.thick, set: v => { S.fabric.thick = v; apply(); } });
+ctl(box, { label: 'Brillo', min: 0, max: 1, step: .01, get: () => 1 - S.fabric.rough, set: v => { S.fabric.rough = 1 - v; S.fabric.spec = 0.02 + v * 0.45; } });
+ctl(box, { label: 'Pelusa / satinado', min: 0, max: 1, step: .01, get: () => S.fabric.sheen, set: v => { S.fabric.sheen = v; } });
+const ws = el('select', { class: 'field', id: 'weaveSel' }); WEAVES.forEach(([v, t]) => ws.append(el('option', { value: v }, t)));
+ws.value = String(S.fabric.weave); ws.onchange = () => { S.fabric.weave = +ws.value; commit(); };
+box.append(el('label', { class: 'lbl', for: 'weaveSel' }, 'Textura del tejido'), ws);
+}
+function buildColors() {
+const slots = $('#slots'); slots.innerHTML = '';
+['Principal', 'Secundario', 'Detalle'].forEach((n, i) => slots.append(el('button', { class: 'slot' + (i === S.slot ? ' on' : ''), onclick: () => { S.slot = i; buildColors(); } }, el('i', { style: 'background:' + S.colors[i] }), n)));
+const ci = $('#slotColor'); ci.value = S.colors[S.slot];
+ci.oninput = () => { S.colors[S.slot] = ci.value; slots.children[S.slot].firstChild.style.background = ci.value; harmonies(); contrastInfo(); refreshPreviews(); };
+ci.onchange = () => { buildColors(); refreshTips(); commit(); };
+const hb = $('#harmonyBtns'); hb.innerHTML = '';
+for (const [k, n] of [['comp', 'Complementaria'], ['ana', 'Análoga'], ['tri', 'Triádica'], ['split', 'Dividida'], ['tet', 'Tetrádica'], ['mono', 'Monocromática']]) hb.append(el('button', { class: 'chip' + (k === harmonyMode ? ' on' : ''), onclick: () => { harmonyMode = k; buildColors(); } }, n));
+harmonies(); contrastInfo();
+const pl = $('#paletteList'); pl.innerHTML = '';
+for (const [name, cols, note] of PALETTES) pl.append(el('button', { class: 'pal', onclick: () => { S.colors = cols.slice(); buildColors(); refreshPreviews(); refreshTips(); commit(true); } }, el('span', { class: 'dots' }, ...cols.map(c => el('i', { style: 'background:' + c }))), name, el('small', {}, note)));
+}
+const WEAVES = [['0', 'Lisa'], ['1', 'Tafetán'], ['2', 'Ripstop'], ['3', 'Mezclilla'], ['4', 'Lana'], ['5', 'Polar'], ['6', 'Punto'], ['7', 'Malla calada'], ['8', 'Cuero'], ['9', 'Satén'], ['10', 'Acolchado'], ['11', 'Pana'], ['12', 'Tweed'], ['13', 'Piel sintética']];
+let harmonyMode = 'comp';
+const HARMONY_HINT = { comp: 'Opuestos del círculo: máximo contraste. Usa uno como dominante.', ana: 'Vecinos del círculo: armonía natural y tranquila.', tri: 'Tres tonos equidistantes: alegre; baja la saturación de dos.', split: 'Un color y los vecinos de su opuesto: contraste más suave.', tet: 'Dos pares complementarios: rica, deja uno dominante.', mono: 'Un solo tono en distintos valores: elegante y segura.' };
+function harmonies() {
+const [h, s, l] = hexToHsl(S.colors[S.slot]);
+const sets = { comp: [[h, s, l], [h + 180, s, l], [h + 180, s * .6, Math.min(l + .25, .92)], [h, s * .5, Math.max(l - .25, .12)]], ana: [[h - 30, s, l], [h, s, l], [h + 30, s, l], [h + 15, s * .5, Math.min(l + .3, .94)]], tri: [[h, s, l], [h + 120, s * .7, l], [h + 240, s * .7, l]], split: [[h, s, l], [h + 150, s, l], [h + 210, s, l]], tet: [[h, s, l], [h + 60, s, l], [h + 180, s, l], [h + 240, s, l]], mono: [[h, s, Math.max(l - .3, .08)], [h, s, Math.max(l - .15, .12)], [h, s, l], [h, s * .7, Math.min(l + .18, .9)], [h, s * .4, Math.min(l + .34, .96)]] };
+const box = $('#harmonySw'); box.innerHTML = '';
+for (const [a, b, c] of sets[harmonyMode]) { const hex = hslToHex(a, clamp(b, 0, 1), clamp(c, 0, 1)); box.append(el('button', { class: 'sw', style: 'background:' + hex, title: 'Usar ' + hex + ' en el espacio activo', 'aria-label': 'Usar ' + hex, onclick: () => { S.colors[S.slot] = hex; buildColors(); refreshPreviews(); refreshTips(); commit(true); } })); }
+$('#harmonyHint').textContent = HARMONY_HINT[harmonyMode] + ' Clic en un color para ponerlo en el espacio activo.';
+}
+function contrastInfo() {
+const r = contrastRatio(S.colors[0], S.colors[1]);
+const v = r >= 4.5 ? ['ok', 'Excelente para texto y logos'] : r >= 3 ? ['ok', 'Bien para formas grandes'] : r >= 1.5 ? ['w', 'Bajo: el diseño se verá suave'] : ['w', 'Casi sin contraste'];
+$('#contrastBox').innerHTML = `Contraste Principal / Secundario: <b>${r.toFixed(1)}:1</b> · <span style="color:var(--${v[0] === 'ok' ? 'ok' : 'warn'})">${v[1]}</span>`;
+}
+let patCanvases = [];
+function buildDesign() {
+const grid = $('#patternGrid'); grid.innerHTML = ''; patCanvases = [];
+const list = PATTERNS.concat(patImgLoaded ? [[12, 'Tu imagen']] : []);
+for (const [id, name] of list) {
+const cv = el('canvas', { width: 64, height: 64 }); patCanvases.push([id, cv]);
+grid.append(el('button', { class: 'pat' + (id === S.pattern ? ' on' : ''), title: name, onclick: () => { S.pattern = id; buildDesign(); refreshTips(); commit(true); } }, cv, el('span', {}, name)));
+}
+refreshPreviews();
+const pc = $('#patternCtl'); pc.innerHTML = '';
+ctl(pc, { label: 'Escala del patrón', min: .3, max: 3, step: .05, fmt: v => (+v).toFixed(2) + '×', get: () => S.patScale, set: v => { S.patScale = v; } });
+ctl(pc, { label: 'Rotación del patrón', min: 0, max: 180, step: 1, fmt: v => v + '°', get: () => S.patRot, set: v => { S.patRot = v; } });
+const tx = el('div', { class: 'row wrap' });
+for (const [v, t] of WEAVES) tx.append(el('button', { class: 'chip' + (+v === S.fabric.weave ? ' on' : ''), onclick: () => { S.fabric.weave = +v; buildDesign(); buildFabrics(); commit(true); } }, t));
+pc.append(el('h4', {}, 'Textura de la tela'), tx, el('p', { class: 'hint' }, 'Cambia el relieve de la tela sin cambiar su física. Acércate para ver el detalle.'));
+const dc = $('#decalCtl'); dc.innerHTML = '';
+$('#decalText').value = S.decal.kind === 'text' ? S.decal.text : ''; $('#decalColor').value = S.decal.color; $('#decalFont').value = S.decal.font;
+toggle(dc, 'Mostrar logo / texto', () => S.decal.on, v => { S.decal.on = v; });
+ctl(dc, { label: 'A lo largo (cola → cuello)', min: 0, max: 1, step: .005, fmt: v => Math.round(v * 100) + ' %', get: () => S.decal.u, set: v => { S.decal.u = v; } });
+ctl(dc, { label: 'Alrededor (lomo = 0)', min: -1, max: 1, step: .01, fmt: v => Math.round(v * 100), get: () => S.decal.v, set: v => { S.decal.v = v; } });
+ctl(dc, { label: 'Tamaño', min: .2, max: 3, step: .02, fmt: v => (+v).toFixed(2) + '×', get: () => S.decal.size, set: v => { S.decal.size = v; } });
+ctl(dc, { label: 'Giro', min: -180, max: 180, step: 1, fmt: v => v + '°', get: () => S.decal.rot, set: v => { S.decal.rot = v; } });
+const det = $('#detailCtl'); det.innerHTML = '';
+toggle(det, 'Franja reflectiva', () => S.refl.on, v => { S.refl.on = v; refreshTips(); });
+ctl(det, { label: 'Posición de la franja', min: .05, max: .95, step: .01, fmt: v => Math.round(v * 100) + ' %', get: () => S.refl.pos, set: v => { S.refl.pos = v; } });
+}
+function refreshPreviews() {
+if (!renderer || !patCanvases.length) return;
+const s = { c1: lin(S.colors[0]), c2: lin(S.colors[1]), c3: lin(S.colors[2]), len: 1 };
+const px = renderer.previews(patCanvases.map(p => p[0]), s, 64);
+patCanvases.forEach(([, cv], i) => { const ctx = cv.getContext('2d'); const img = ctx.createImageData(64, 64); for (let y = 0; y < 64; y++) img.data.set(px[i].subarray((63 - y) * 256, (64 - y) * 256), y * 256); ctx.putImageData(img, 0, 0); });
+}
+function buildModel() {
+$('#mdlMat').value = S.model.mat; $('#mdlColor').value = S.model.color; $('#mdlTex').value = S.model.tex; $('#mdlColor2').value = S.model.color2;
+const box = $('#modelCtl'); box.innerHTML = '';
+if (+S.model.mat === 0) ctl(box, { label: 'Opacidad del cristal', min: .15, max: 1, step: .01, fmt: v => Math.round(v * 100) + ' %', get: () => S.model.opacity, set: v => { S.model.opacity = v; } });
+}
+function buildFit() { renderMeasures(); renderProfiles(); renderStats(); }
+function renderMeasures() {
+if (!measures) return; const m = measures;
+$('#measureBox').innerHTML = '';
+$('#measureBox').append(el('h4', {}, 'Medidas del modelo'), el('div', { class: 'measure', html: `<span>Cuello</span><b>${m.neck.toFixed(1)} cm</b><span>Pecho</span><b>${m.chest.toFixed(1)} cm</b><span>Cintura</span><b>${m.waist.toFixed(1)} cm</b><span>Espalda</span><b>${m.back.toFixed(1)} cm</b><span>Altura a la cruz</span><b>${m.height.toFixed(1)} cm</b>` }),
+el('p', { class: 'hint', html: `Talla sugerida <span class="size-pill">${sizeFor(m)}</span><br>Calculado sobre el modelo 3D. Para fabricar, mide a tu perro real.` }));
+}
+function renderStats() {
+const box = $('#garmentStats'); if (!box) return;
+if (!cloth || !GARMENTS[S.garment]) { box.innerHTML = '<p class="hint">Sin prenda.</p>'; return; }
+const a = cloth.info.area, cons = a * 1.15, roll = cons / 1.5;
+const st = cloth.stretchStats();
+box.innerHTML = '';
+box.append(el('div', { class: 'stats', html: `<span>Prenda</span><b>${GARMENTS[S.garment].name}</b><span>Superficie de tela</span><b>${(a * 10000).toFixed(0)} cm²</b><span>Consumo con márgenes (+15 %)</span><b>${(cons * 10000).toFixed(0)} cm²</b><span>Rollo de 1,50 m de ancho</span><b>${Math.max(roll * 100, 1).toFixed(0)} cm de largo</b><span>Peso estimado</span><b>${(cons * S.fabric.weight).toFixed(0)} g</b><span>Piezas</span><b>${cloth.info.pieces}</b><span>Puntos de costura</span><b>${cloth.info.seams}</b><span>Partículas / restricciones</span><b>${cloth.n} / ${cloth.m}</b><span>Estiramiento medio</span><b>${(st.avg * 100).toFixed(1)} %</b>` }));
+}
+function renderProfiles() {
+const box = $('#profileList'); box.innerHTML = '';
+const P = store.get('dfs.profiles', []);
+P.forEach((p, i) => box.append(el('div', { class: 'prof' }, el('span', {}, `${p.name} · cuello ${p.neck} · pecho ${p.chest} · espalda ${p.back} cm`),
+el('button', { onclick: () => { $('#pfName').value = p.name; $('#pfNeck').value = p.neck; $('#pfChest').value = p.chest; $('#pfBack').value = p.back; fitToProfile(p); } }, 'Usar'),
+el('button', { onclick: () => { P.splice(i, 1); store.set('dfs.profiles', P); renderProfiles(); }, 'aria-label': 'Borrar perfil ' + p.name }, '✕'))));
+}
+function readProfile() {
+const p = { name: $('#pfName').value.trim() || 'Mi perro', neck: +$('#pfNeck').value, chest: +$('#pfChest').value, back: +$('#pfBack').value };
+if (!(p.back > 5 && p.chest > 10 && p.neck > 5)) { toast('Escribe cuello, pecho y espalda en cm'); return null; }
+return p;
+}
+function fitToProfile(p) {
+for (let it = 0; it < 4; it++) {
+let d = buildDog(S.dog), m = measureDog(d);
+S.dog.h = clamp(S.dog.h * p.back / m.back, .12, 1.1);
+d = buildDog(S.dog); m = measureDog(d);
+const r = p.chest / m.chest; S.dog.girth = clamp(S.dog.girth * Math.pow(r, 0.6), .6, 1.6); S.dog.wid = clamp(S.dog.wid * Math.pow(r, 0.4), .45, 1.3);
+d = buildDog(S.dog); m = measureDog(d);
+S.dog.neckT = clamp(S.dog.neckT * p.neck / m.neck, .5, 2.2);
+}
+buildShape(); rebuildDog(); commit(true);
+toast(`Maqueta ajustada: pecho ${measures.chest.toFixed(0)}, espalda ${measures.back.toFixed(0)}, cuello ${measures.neck.toFixed(0)} cm`);
+}
+let patImgLoaded = false, decalReady = false, decalAspect = 0.35;
+function downscale(img, max) { const s = Math.min(1, max / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.width * s)); c.height = Math.max(1, Math.round(img.height * s)); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); return c; }
+function readImage(file, cb) { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => cb(img); img.onerror = () => toast('No se pudo leer esa imagen'); img.src = r.result; }; r.readAsDataURL(file); }
+function loadPatImg(url) { if (!url) { patImgLoaded = false; return; } const img = new Image(); img.onload = () => { renderer.setTexture('img', downscale(img, 1024)); patImgLoaded = true; buildDesign(); }; img.src = url; }
+function textCanvas(text, font, color) {
+const c = document.createElement('canvas'), x = c.getContext('2d'), fs = 160;
+x.font = `700 ${fs}px ${font}`; const w = Math.ceil(x.measureText(text).width) + 40;
+c.width = Math.max(w, 64); c.height = Math.round(fs * 1.3);
+x.font = `700 ${fs}px ${font}`; x.fillStyle = color; x.textBaseline = 'middle'; x.textAlign = 'center';
+x.fillText(text, c.width / 2, c.height / 2 + fs * 0.04); return c;
+}
+function refreshDecalTex() {
+const d = S.decal;
+if (d.kind === 'text' && d.text) { const c = textCanvas(d.text, d.font, d.color); renderer.setTexture('decal', c); decalAspect = c.height / c.width; decalReady = true; }
+else if (d.kind === 'image' && d.img) { const img = new Image(); img.onload = () => { const c = downscale(img, 1024); renderer.setTexture('decal', c); decalAspect = c.height / c.width; decalReady = true; }; img.src = d.img; }
+else decalReady = false;
+}
+let tipsClosed = false;
+function refreshTips() {
+const box = $('#tips'); if (tipsClosed) { box.classList.remove('show'); return; }
+const t = studioTips(S, measures); box.innerHTML = '';
+box.append(el('button', { class: 'x', 'aria-label': 'Cerrar consejos', onclick: () => { tipsClosed = true; box.classList.remove('show'); } }, '✕'), el('h5', {}, 'Consejos del estudio'));
+for (const [k, msg] of t) box.append(el('p', { class: k }, msg));
+box.classList.add('show');
+}
+function guideModal(start) {
+const nav = el('nav'), art = el('article');
+const show = id => { const k = KB.find(x => x.id === id); art.innerHTML = k.html; nav.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.id === id)); art.scrollTop = 0; };
+for (const k of KB) nav.append(el('button', { 'data-id': k.id, onclick: () => show(k.id) }, k.title));
+const wrap = el('div', { class: 'guide' }, nav, art); openModal(wrap); show(start || KB[0].id);
+}
+function keysModal() {
+const rows = [['Espacio', 'Pausar / reanudar simulación'], ['R', 'Reiniciar tela'], ['W', 'Ver malla'], ['A', 'Girar 360°'], ['F', 'Foto'], ['1 – 5', 'Vistas: 3/4, lado, frente, arriba, atrás'], ['Ctrl + Z / Ctrl + Y', 'Deshacer / rehacer'], ['Ctrl + S', 'Guardar proyecto'], ['Arrastrar', 'Girar la cámara o mover la tela'], ['Shift + arrastrar / clic derecho', 'Desplazar la cámara'], ['Doble clic en la tela', 'Poner o quitar alfiler'], ['Rueda', 'Acercar / alejar'], ['Esc', 'Cerrar ventana']];
+const g = el('div', { class: 'keys' }); for (const [k, v] of rows) g.append(el('span', {}, ...k.split(' ').map(p => ['/', '+', '–'].includes(p) ? ' ' + p + ' ' : el('kbd', {}, p))), el('span', {}, v));
+openModal(el('div', {}, el('h2', {}, 'Atajos de teclado'), g));
+}
+function saveProject() {
+S.name = $('#projName').value.trim() || 'Mi diseño';
+const P = store.get('dfs.projects', {}); const id = S.id || ('p' + Date.now()); S.id = id;
+P[id] = { name: S.name, saved: Date.now(), state: S };
+if (store.set('dfs.projects', P)) toast('Proyecto guardado en este navegador'); else toast('No se pudo guardar: el almacenamiento del navegador está lleno o bloqueado');
+commit(true);
+}
+function projectsModal() {
+const P = store.get('dfs.projects', {}); const box = el('div');
+box.append(el('h2', {}, 'Proyectos'), el('p', { class: 'hint' }, 'Se guardan en este navegador. Para pasarlos a otro equipo, copia el JSON y pégalo allí.'));
+const list = el('div');
+const ids = Object.keys(P).sort((a, b) => P[b].saved - P[a].saved);
+if (!ids.length) list.append(el('p', { class: 'hint' }, 'Aún no has guardado proyectos.'));
+for (const id of ids) {
+const del = el('button', { class: 'btn small ghost' }, 'Eliminar');
+del.onclick = () => { if (del.dataset.c) { delete P[id]; store.set('dfs.projects', P); projectsModal(); } else { del.dataset.c = 1; del.textContent = '¿Eliminar de verdad?'; } };
+list.append(el('div', { class: 'proj-row' }, el('span', {}, P[id].name, el('br'), el('small', {}, new Date(P[id].saved).toLocaleString('es'))), el('button', { class: 'btn small', onclick: () => { restore(JSON.stringify(P[id].state)); commit(true); closeModal(); toast('Proyecto abierto'); } }, 'Abrir'), del));
+}
+const ta = el('textarea', { class: 'field', rows: 4, placeholder: 'Pega aquí el JSON de un proyecto', 'aria-label': 'JSON del proyecto' });
+box.append(list, el('div', { class: 'row wrap' },
+el('button', { class: 'btn small', onclick: () => { const keep = { patImg: null }; S = Object.assign(defaultState(), keep); lastBreedFit = null; buildUI(); refreshDecalTex(); rebuildDog(); commit(true); closeModal(); toast('Nuevo proyecto'); } }, 'Nuevo proyecto'),
+el('button', { class: 'btn small ghost', onclick: () => { navigator.clipboard.writeText(JSON.stringify(S)).then(() => toast('JSON copiado'), () => { ta.value = JSON.stringify(S); toast('Copia el texto del recuadro'); }); } }, 'Copiar JSON del actual')),
+el('h3', {}, 'Importar'), ta, el('button', { class: 'btn small', onclick: () => { try { const o = JSON.parse(ta.value); if (!o.dog || !o.garment) throw 0; restore(JSON.stringify(Object.assign(defaultState(), o))); commit(true); closeModal(); toast('Proyecto importado'); } catch (e) { toast('Ese texto no es un proyecto válido'); } } }, 'Importar'));
+openModal(box);
+}
+function photo() {
+const c = renderer.canvas, old = qLevel;
+draw(true); const url = c.toDataURL('image/png');
+openModal(el('div', { class: 'photo' }, el('h2', {}, 'Foto del diseño'), el('p', { class: 'hint' }, 'Clic derecho (o mantén pulsado en el móvil) sobre la imagen y elige "Guardar imagen".'), el('img', { src: url, alt: 'Foto del diseño ' + S.name })));
+}
+function wire_() {
+tabs();
+$('#breedSearch').addEventListener('input', buildBreeds);
+const msw = right => { document.body.classList.toggle('m-right', right); $('#mswLeft').classList.toggle('ghost', right); $('#mswRight').classList.toggle('ghost', !right); };
+$('#mswLeft').onclick = () => msw(false); $('#mswRight').onclick = () => msw(true);
+if (matchMedia('(pointer:coarse)').matches) $('#viewHint').textContent = 'Arrastra para girar · pellizca para acercar · arrastra la tela para moverla · toca dos veces la tela para un alfiler';
+$('#projName').addEventListener('change', () => { S.name = $('#projName').value; commit(); });
+$('#saveBtn').onclick = saveProject; $('#projectsBtn').onclick = projectsModal; $('#guideBtn').onclick = () => guideModal(); $('#keysBtn').onclick = keysModal;
+$('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
+$('#modalClose').onclick = closeModal; $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+$('#playBtn').onclick = () => { playing = !playing; $('#playBtn').textContent = playing ? '❚❚ Pausar' : '▶ Simular'; };
+$('#resetClothBtn').onclick = () => { rebuildGarment(); toast('Tela reiniciada'); };
+$('#wind').oninput = e => { S.sim.wind = +e.target.value; }; $('#wind').onchange = () => commit();
+$('#pose').onchange = e => { S.sim.pose = +e.target.value; if (S.sim.pose === 0) stopAnimation(); commit(); };
+$('#spinBtn').onclick = () => { spin = !spin; cam.goal = null; $('#spinBtn').classList.toggle('on', spin); };
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => setView(+b.dataset.view));
+$('#wireBtn').onclick = () => { wire = !wire; $('#wireBtn').classList.toggle('on', wire); };
+$('#photoBtn').onclick = photo;
+$('#quality').onchange = e => { qMode = e.target.value; if (qMode !== 'auto') setQuality(+qMode); };
+$('#patImg').onchange = e => { const f = e.target.files[0]; if (!f) return; readImage(f, img => { const c = downscale(img, 512); S.patImg = c.toDataURL('image/png'); renderer.setTexture('img', downscale(img, 1024)); patImgLoaded = true; S.pattern = 12; buildDesign(); commit(true); toast('Imagen aplicada como estampado'); }); e.target.value = ''; };
+$('#decalTextBtn').onclick = () => { const t = $('#decalText').value.trim(); if (!t) { toast('Escribe un texto primero'); return; } Object.assign(S.decal, { kind: 'text', text: t, font: $('#decalFont').value, color: $('#decalColor').value, on: true }); refreshDecalTex(); buildDesign(); refreshTips(); commit(true); };
+$('#decalColor').oninput = () => { if (S.decal.kind === 'text') { S.decal.color = $('#decalColor').value; refreshDecalTex(); } };
+$('#decalColor').onchange = () => { refreshTips(); commit(); };
+$('#decalFont').onchange = () => { if (S.decal.kind === 'text') { S.decal.font = $('#decalFont').value; refreshDecalTex(); commit(); } };
+$('#decalImg').onchange = e => { const f = e.target.files[0]; if (!f) return; readImage(f, img => { S.decal.kind = 'image'; S.decal.img = downscale(img, 512).toDataURL('image/png'); S.decal.on = true; refreshDecalTex(); buildDesign(); commit(true); toast('Logo aplicado'); }); e.target.value = ''; };
+$('#mdlMat').onchange = e => { S.model.mat = +e.target.value; buildModel(); commit(); };
+$('#mdlColor').oninput = e => { S.model.color = e.target.value; }; $('#mdlColor').onchange = () => commit();
+$('#mdlWhite').onclick = () => { S.model.color = '#ffffff'; S.model.tex = 0; buildModel(); commit(true); };
+$('#mdlTex').onchange = e => { S.model.tex = +e.target.value; commit(); };
+$('#mdlColor2').oninput = e => { S.model.color2 = e.target.value; }; $('#mdlColor2').onchange = () => commit();
+$('#pfApply').onclick = () => { const p = readProfile(); if (p) fitToProfile(p); };
+$('#pfSave').onclick = () => { const p = readProfile(); if (!p) return; const P = store.get('dfs.profiles', []); P.push(p); store.set('dfs.profiles', P); renderProfiles(); toast('Perfil guardado'); };
+$('#saveFabricBtn').onclick = () => { const n = $('#customFabricName').value.trim(); if (!n) { toast('Ponle un nombre a tu tela'); return; } const C = customFabrics(); const id = 'c_' + n.toLowerCase().replace(/[^a-z0-9]+/g, '_'); C[id] = Object.assign({}, S.fabric, { name: n, note: 'Personalizada', swatch: S.colors[0] }); store.set('dfs.fabrics', C); S.fabricId = id; buildFabrics(); toast('Tela guardada'); $('#customFabricName').value = ''; };
+window.addEventListener('keydown', e => {
+const tag = (e.target.tagName || '').toLowerCase(); const typing = ['input', 'textarea', 'select'].includes(tag) && e.target.type !== 'range' && e.target.type !== 'checkbox';
+if (e.key === 'Escape') { closeModal(); return; }
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveProject(); return; }
+if (typing) return;
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); return; }
+if (e.ctrlKey || e.metaKey || e.altKey) return;
+const k = e.key.toLowerCase();
+if (k === ' ') { e.preventDefault(); $('#playBtn').click(); }
+else if (k === 'r') $('#resetClothBtn').click();
+else if (k === 'w') $('#wireBtn').click();
+else if (k === 'a') $('#spinBtn').click();
+else if (k === 'f') photo();
+else if (k === '?') keysModal();
+else if (k >= '1' && k <= '5') setView(+k - 1);
+});
+window.addEventListener('resize', () => { if (dog) draw(false); });
+}
+function deepMerge(a, b) { for (const [k, v] of Object.entries(b)) { if (v && typeof v === 'object' && !Array.isArray(v) && a[k] && typeof a[k] === 'object') deepMerge(a[k], v); else a[k] = v; } return a; }
+window.__cam = (th, ph) => { cam.th = th; cam.ph = ph; cam.goal = null; spin = false; };
+window.DogStudio = {
+get state() { return JSON.parse(JSON.stringify(S)); },
+set(patch) { const next = deepMerge(JSON.parse(JSON.stringify(S)), patch); if (patch.breedId && !patch.dog) next.dog = breedParams(patch.breedId); if (patch.fabricId && !patch.fabric && allFabrics()[patch.fabricId]) next.fabric = Object.assign({}, allFabrics()[patch.fabricId]); restore(JSON.stringify(next)); commit(true); return this.state; },
+measures: () => measures && Object.assign({ size: sizeFor(measures) }, measures),
+tips: () => studioTips(S, measures).map(t => t[1]),
+knowledge: KB.map(k => ({ id: k.id, title: k.title, text: k.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() })),
+catalog: { breeds: BREEDS.map(b => ({ id: b[0], name: b[1] })), garments: Object.entries(GARMENTS).map(([id, g]) => ({ id, name: g.name, desc: g.desc })), fabrics: Object.entries(FABRICS).map(([id, f]) => ({ id, name: f.name, weight: f.weight, note: f.note })), patterns: PATTERNS.map(p => ({ id: p[0], name: p[1] })), palettes: PALETTES.map(p => ({ name: p[0], colors: p[1], note: p[2] })) },
+photo: () => { draw(true); return renderer.canvas.toDataURL('image/png'); }
+};
+function boot() {
+try { renderer = new Renderer($('#gl')); } catch (e) { console.error(e); $('#glfail').hidden = false; return; }
+const saved = store.get('dfs.current', null);
+if (saved && saved.dog && saved.garment && GARMENTS[saved.garment]) S = Object.assign(defaultState(), saved);
+wire_(); buildUI(); bindCanvas();
+if (S.patImg) loadPatImg(S.patImg);
+refreshDecalTex();
+rebuildDog(); refreshTips(); commit(true);
+setTimeout(hideHint, 9000);
+requestAnimationFrame(frame);
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (renderer) refreshDecalTex(); });
+boot();
+})();
+</script>
+</body>
+</html>
